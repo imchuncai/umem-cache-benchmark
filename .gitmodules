@@ -1,0 +1,12 @@
+[submodule "memcached"]
+	path = memcached
+	url = https://github.com/memcached/memcached.git
+[submodule "redis"]
+	path = redis
+	url = https://github.com/redis/redis.git
+[submodule "pogocache"]
+	path = pogocache
+	url = https://github.com/tidwall/pogocache.git
+[submodule "umem-cache"]
+	path = umem-cache
+	url = https://github.com/imchuncai/umem-cache.git

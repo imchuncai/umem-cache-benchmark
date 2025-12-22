@@ -1,0 +1,187 @@
+.. SPDX-License-Identifier: BSD-3-Clause
+.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+
+=================
+BENCHMARK-2G-513K
+=================
+
+CONCLUSION
+==========
+
+The test results showed that the performance of MEMCACHED, UMEM-CACHE, and REDIS
+are very close, and MEMCACHED's hit rate is about 25% higher than REDIS. But
+REDIS only used 82% of the configured memory. And POGOCACHE really not respect
+the memory limit, it used more than 40% of the limitation.
+
+The reason that the performance is close among these apps, is that the cache
+value is relatively large, the performance bottleneck is at the server size
+network output. The server side output speed is more than 850Mb/s and we are
+under Gigabit network.
+
+MEMCACHED
+=========
+::
+
+	commit 4b9e6198fc44c9eb3ae80802a1b0dcbaf9602969
+
+BUILD COMMAND
+-------------
+::
+
+	./autogen.sh
+	./configure
+	make -j
+
+RUN COMMAND
+-----------
+::
+
+	./memcached --conn-limit=512 --memory-limit=2048 --max-item-size=2097152 -t 4 -u root
+
+TEST RESULT
+-----------
+::
+
+	go test -bench=^BenchmarkMemcached$ -benchtime=65408x		       \
+	-args false 2147483648 525312 20 80 80 16 [fe80::4038:6954:f1a3:4d0f%end0]
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkMemcached-4   	
+	=======================================================
+	case:   16352    hot:    3270(20%)    hot_access: 80% 
+	get:   65408    hit:   46368    hit_rate: 70.89% 
+	hot:   52259    hit:   45123    hit_rate: 86.34% 
+	VmHWM: 2109752 kB    per_memory_hit_rate: 70.47%
+	213.431s
+	=======================================================
+	65408	   3263079 ns/op	      216 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	426.429s
+
+	out IO speed: 871Mb/s
+
+UMEM-CACHE
+==========
+::
+
+	commit 53f97eb219364fb18e15431e069b2ceef877b5d9
+
+BUILD COMMAND
+-------------
+::
+
+	make MEM_LIMIT=2147483648
+
+RUN COMMAND
+-----------
+::
+
+	./umem-cache 10047
+
+TEST RESULT
+-----------
+::
+
+	go test -bench=^BenchmarkUmemCache$ -benchtime=65408x		       \
+	-args false 2147483648 525312 20 80 80 16 [fe80::4038:6954:f1a3:4d0f%end0]
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkUmemCache-4   	
+	=======================================================
+	case:   16352    hot:    3270(20%)    hot_access: 80% 
+	get:   65408    hit:   44554    hit_rate: 68.12% 
+	hot:   52259    hit:   43189    hit_rate: 82.64% 
+	VmHWM: 2097124 kB    per_memory_hit_rate: 68.12%
+	207.229s
+	=======================================================
+	65408	   3168247 ns/op	      215 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	417.953s
+
+	out IO speed: 862Mb/s
+
+REDIS
+=====
+::
+
+	commit e6e0cf5764c99fc1414e46197126e84360536df6
+
+BUILD COMMAND
+-------------
+::
+
+	make -j
+
+RUN COMMAND
+-----------
+::
+
+	./src/redis-server --protected-mode no --appendonly no --save ""       \
+	--maxmemory 2147483648 --maxclients 512 --maxmemory-policy allkeys-lru --port 6379
+
+TEST RESULT
+-----------
+::
+
+	go test -bench=^BenchmarkRedis1$ -benchtime=65408x		       \
+	-args false 2147483648 525312 20 80 80 16 [fe80::4038:6954:f1a3:4d0f%end0]
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkRedis1-4   	
+	=======================================================
+	case:   16352    hot:    3270(20%)    hot_access: 80% 
+	get:   65408    hit:   36899    hit_rate: 56.41% 
+	hot:   52259    hit:   35923    hit_rate: 68.74% 
+	VmHWM: 1709896 kB    per_memory_hit_rate: 56.41%
+	173.986s
+	=======================================================
+	65408	   2660009 ns/op	      212 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	351.977s
+
+	out IO speed: 850Mb/s
+
+POGOCACHE
+=========
+::
+
+	commit 71972a9f161d96d91b0f67bfe28897d00bfbd49b
+
+BUILD COMMAND
+-------------
+::
+
+	make -j NOMIMALLOC=1
+
+RUN COMMAND
+-----------
+::
+
+	./pogocache --threads=4 --maxmemory=2147483648 --maxconns=512	       \
+	--port=9401 -h 192.168.101.10
+
+TEST RESULT
+-----------
+::
+
+	go test -bench=^BenchmarkPogocache$ -benchtime=65408x		       \
+	-args false 2147483648 525312 20 80 80 16 192.168.101.10
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkPogocache-4   	
+	=======================================================
+	case:   16352    hot:    3270(20%)    hot_access: 80% 
+	get:   65408    hit:   46727    hit_rate: 71.44% 
+	hot:   52259    hit:   43990    hit_rate: 84.18% 
+	VmHWM: 3038480 kB    per_memory_hit_rate: 49.31%
+	213.987s
+	=======================================================
+	65408	   3271567 ns/op	      151 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	425.519s
+
+	out IO speed: 875Mb/s
