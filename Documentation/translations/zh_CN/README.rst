@@ -72,6 +72,34 @@ Multilingual 多语言
 测试结果
 =======
 
+我们在基准测试中发现memcached存在一个严重问题：在特别情况下，你将永远无法成功设置某个键。具体
+来说， 如果你在往slab存储任何键之前，已经用大键分配的数据块耗尽了该slab的存储，那么你将无法存
+储满足该slab大小的任何键。用以下命令可以复现这个问题：
+
+::
+	# bash A
+
+	./memcached --conn-limit=512 --memory-limit=100 --max-item-size=1048576 -t 4 -u root
+
+::
+
+	# bash B
+	
+	a_540k=$(for i in {1..552960}; do printf "a"; done)
+	a_20000=$(for i in {1..20000}; do printf "a"; done)
+	a_30000=$(for i in {1..30000}; do printf "a"; done)
+
+	for i in {1..180}; do
+		printf "set ${i} 0 0 552960\r\n${a_540k}\r\n" | nc 127.0.0.1 11211
+	done
+
+	for i in {201..344}; do
+		printf "set ${i} 0 0 20000\r\n${a_20000}\r\n" | nc 127.0.0.1 11211
+	done
+
+	# this set can never be stored
+	printf "set 400 0 0 30000\r\n${a_30000}\r\n" | nc 127.0.0.1 11211
+
 RPI4B
 -----
 

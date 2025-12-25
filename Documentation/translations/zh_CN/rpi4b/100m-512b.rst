@@ -43,14 +43,14 @@ MEMCACHED
 	BenchmarkMemcached-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 2088863    hit_rate: 63.75% 
-	hot: 2621158    hit: 2041692    hit_rate: 77.89% 
-	VmHWM:  106644 kB    per_memory_hit_rate: 61.04%
-	79.699s
+	get: 3276800    hit: 2089542    hit_rate: 63.77% 
+	hot: 2621158    hit: 2042441    hit_rate: 77.92% 
+	VmHWM:  106500 kB    per_memory_hit_rate: 61.32%
+	80.655s
 	=======================================================
-	3276800	     24322 ns/op	      25166 hit/s/mem
+	3276800	     24614 ns/op	      24910 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	161.685s
+	ok  	github.com/imchuncai/umem-cache-benchmark	166.290s
 
 UMEM-CACHE
 ==========

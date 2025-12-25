@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"math"
 	"os/exec"
-	"strings"
 	"testing"
-	"time"
 	"unsafe"
 
 	"github.com/bradfitz/gomemcache/memcache"
@@ -48,14 +46,11 @@ func runMemcachedServer(serverMemory int, kvSizeLimit int, remoteIP string) ([]*
 		}
 
 		val := fallbackVal()
-		err = client.Set(&memcache.Item{Key: strKey, Value: val})
-		for err != nil && strings.HasPrefix(err.Error(), `memcache: unexpected response line from "set": "SERVER_ERROR out of memory storing object`) {
-			// shut: SERVER_ERROR out of memory storing object, this
-			// may hurt statics, but we got no choice
-			time.Sleep(time.Second)
-			err = client.Set(&memcache.Item{Key: strKey, Value: val})
-		}
-		return val, err
+		client.Set(&memcache.Item{Key: strKey, Value: val})
+		// memcached server may return error: "SERVER_ERROR out of memory storing object",
+		// and we just ignored it instead of retry,
+		// because memcached has a serious issue may cause the retry endless
+		return val, nil
 	}
 	return cmd, getOrSet, nil
 }

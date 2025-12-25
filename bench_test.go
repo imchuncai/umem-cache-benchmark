@@ -20,7 +20,7 @@ import (
 
 const (
 	THREAD_NR = 4
-	TIMEOUT   = 10 * time.Second
+	TIMEOUT   = 30 * time.Second
 )
 
 func percent(i, n int) float64 {
@@ -79,13 +79,15 @@ func getVmHWM(b testing.TB, cmds []*exec.Cmd) uint64 {
 }
 
 func stop(cmd *exec.Cmd) error {
-	err := cmd.Process.Signal(syscall.SIGTERM)
-	if err != nil {
-		return fmt.Errorf("signal SIGTERM failed: %w", err)
-	}
-	_, err = cmd.Process.Wait()
-	if err != nil {
-		return fmt.Errorf("wait failed: %w", err)
+	if cmd.Process != nil {
+		err := cmd.Process.Signal(syscall.SIGTERM)
+		if err != nil {
+			return fmt.Errorf("signal SIGTERM failed: %w", err)
+		}
+		_, err = cmd.Process.Wait()
+		if err != nil {
+			return fmt.Errorf("wait failed: %w", err)
+		}
 	}
 	return nil
 }

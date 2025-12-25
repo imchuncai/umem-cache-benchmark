@@ -3,10 +3,10 @@
 	url = https://github.com/memcached/memcached.git
 [submodule "redis"]
 	path = redis
-	url = https://github.com/redis/redis.git
+	url = https://github.com/memcached/redis.git
 [submodule "pogocache"]
 	path = pogocache
-	url = https://github.com/tidwall/pogocache.git
+	url = https://github.com/memcached/pogocache.git
 [submodule "umem-cache"]
 	path = umem-cache
-	url = https://github.com/imchuncai/umem-cache.git
+	url = https://github.com/memcached/umem-cache.git

@@ -24,8 +24,8 @@ Cons
 - key size limit to 255 bytes
 - not support pipeline
 
-MEM-CACHED
-==========
+MEMCACHED
+=========
 
 Pros
 ----
@@ -38,7 +38,7 @@ Pros
 Cons
 ----
 
-- complain insufficient memory during high workload
+- there is serious issue where set command can never be stored
 - key size limit to 250 bytes
 - key only takes visible characters
 

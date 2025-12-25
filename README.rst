@@ -75,6 +75,36 @@ RANDOM-100M-1K
 TEST RESULT
 ===========
 
+We discovered a serious issue with memcached in our benchmark test, there is a
+corner case that your set of a key will never succeed. Specifically, id you
+exhausted slab's storage space with chunk data allocated by big keys before
+storing any keys into it, you'll unable to store keys that meet the slab's items
+size. It can be reproduced by following commands:
+
+::
+	# bash A
+
+	./memcached --conn-limit=512 --memory-limit=100 --max-item-size=1048576 -t 4 -u root
+
+::
+
+	# bash B
+	
+	a_540k=$(for i in {1..552960}; do printf "a"; done)
+	a_20000=$(for i in {1..20000}; do printf "a"; done)
+	a_30000=$(for i in {1..30000}; do printf "a"; done)
+
+	for i in {1..180}; do
+		printf "set ${i} 0 0 552960\r\n${a_540k}\r\n" | nc 127.0.0.1 11211
+	done
+
+	for i in {201..344}; do
+		printf "set ${i} 0 0 20000\r\n${a_20000}\r\n" | nc 127.0.0.1 11211
+	done
+
+	# this set can never be stored
+	printf "set 400 0 0 30000\r\n${a_30000}\r\n" | nc 127.0.0.1 11211
+
 RPI4B
 -----
 

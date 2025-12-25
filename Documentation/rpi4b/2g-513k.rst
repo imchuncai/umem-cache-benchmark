@@ -50,16 +50,16 @@ TEST RESULT
 	BenchmarkMemcached-4   	
 	=======================================================
 	case:   16352    hot:    3270(20%)    hot_access: 80% 
-	get:   65408    hit:   46368    hit_rate: 70.89% 
-	hot:   52259    hit:   45123    hit_rate: 86.34% 
-	VmHWM: 2109752 kB    per_memory_hit_rate: 70.47%
-	213.431s
+	get:   65408    hit:   46359    hit_rate: 70.88% 
+	hot:   52259    hit:   45115    hit_rate: 86.33% 
+	VmHWM: 2109744 kB    per_memory_hit_rate: 70.46%
+	213.891s
 	=======================================================
-	65408	   3263079 ns/op	      216 hit/s/mem
+	65408	   3270111 ns/op	      215 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	426.429s
+	ok  	github.com/imchuncai/umem-cache-benchmark	427.504s
 
-	out IO speed: 871Mb/s
+	out IO speed: 869Mb/s
 
 UMEM-CACHE
 ==========
