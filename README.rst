@@ -82,6 +82,7 @@ storing any keys into it, you'll unable to store keys that meet the slab's items
 size. It can be reproduced by following commands:
 
 ::
+
 	# bash A
 
 	./memcached --conn-limit=512 --memory-limit=100 --max-item-size=1048576 -t 4 -u root

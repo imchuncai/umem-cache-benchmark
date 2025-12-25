@@ -77,6 +77,7 @@ Multilingual 多语言
 储满足该slab大小的任何键。用以下命令可以复现这个问题：
 
 ::
+
 	# bash A
 
 	./memcached --conn-limit=512 --memory-limit=100 --max-item-size=1048576 -t 4 -u root
