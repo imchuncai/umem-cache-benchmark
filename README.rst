@@ -76,7 +76,7 @@ TEST RESULT
 ===========
 
 We discovered a serious issue with memcached in our benchmark test, there is a
-corner case that your set of a key will never succeed. Specifically, id you
+corner case that your set of a key will never succeed. Specifically, if you
 exhausted slab's storage space with chunk data allocated by big keys before
 storing any keys into it, you'll unable to store keys that meet the slab's items
 size. It can be reproduced by following commands:
