@@ -9,7 +9,7 @@
 ====
 
 性能测试结果显示UMEM-CACHE，MEMCACHED和REDIS三者的缓存性能表现十分接近，UMEM-CACHE比
-REDIS命中率高11%左右。POGOCACHE完全没有限制内存使用量，它多用了50%的内存。
+REDIS命中率高12%左右。POGOCACHE完全没有限制内存使用量，它多用了50%的内存。
 
 这些应用的性能如此接近是因为缓存的值比较大，此时的性能瓶颈在服务端网络输出。服务端网络输出的速度
 已经高于850Mb/s，而我们处于千兆网络中。
@@ -87,16 +87,16 @@ UMEM-CACHE
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:   16384    hot:    3276(20%)    hot_access: 80% 
-	get:   65536    hit:   45052    hit_rate: 68.74% 
-	hot:   52582    hit:   43685    hit_rate: 83.08% 
-	VmHWM: 2098444 kB    per_memory_hit_rate: 68.70%
-	213.693s
+	get:   65536    hit:   45057    hit_rate: 68.75% 
+	hot:   52582    hit:   43690    hit_rate: 83.09% 
+	VmHWM: 2098372 kB    per_memory_hit_rate: 68.71%
+	207.934s
 	=======================================================
-	65536	   3260696 ns/op	      211 hit/s/mem
+	65536	   3172826 ns/op	      217 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	424.134s
+	ok  	github.com/imchuncai/umem-cache-benchmark	418.542s
 
-	out IO speed: 843Mb/s
+	out IO speed: 867Mb/s
 
 REDIS
 =====

@@ -83,14 +83,14 @@ TEST RESULT
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 2033074    hit_rate: 62.04% 
-	hot: 2621158    hit: 1977813    hit_rate: 75.46% 
+	get: 3276800    hit: 2033070    hit_rate: 62.04% 
+	hot: 2621158    hit: 1977812    hit_rate: 75.46% 
 	VmHWM:  103700 kB    per_memory_hit_rate: 61.26%
-	78.249s
+	77.674s
 	=======================================================
-	3276800	     23880 ns/op	      25656 hit/s/mem
+	3276800	     23704 ns/op	      25846 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	157.792s
+	ok  	github.com/imchuncai/umem-cache-benchmark	157.925s
 
 REDIS
 =====

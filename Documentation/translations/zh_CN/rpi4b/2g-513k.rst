@@ -88,16 +88,16 @@ UMEM-CACHE
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:   16352    hot:    3270(20%)    hot_access: 80% 
-	get:   65408    hit:   44554    hit_rate: 68.12% 
-	hot:   52259    hit:   43189    hit_rate: 82.64% 
-	VmHWM: 2097124 kB    per_memory_hit_rate: 68.12%
-	207.229s
+	get:   65408    hit:   44565    hit_rate: 68.13% 
+	hot:   52259    hit:   43197    hit_rate: 82.66% 
+	VmHWM: 2097120 kB    per_memory_hit_rate: 68.13%
+	206.207s
 	=======================================================
-	65408	   3168247 ns/op	      215 hit/s/mem
+	65408	   3152627 ns/op	      216 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	417.953s
+	ok  	github.com/imchuncai/umem-cache-benchmark	414.993s
 
-	out IO speed: 862Mb/s
+	out IO speed: 866Mb/s
 
 REDIS
 =====

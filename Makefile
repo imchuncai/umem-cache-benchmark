@@ -31,7 +31,7 @@ define test =
 	@echo ""
 endef
 
-test-random-100m-1k test-random-2g-1m test-2g-513k: test-%: $(foreach app, $(apps), test-$(app)-%);
+test-random-100m-1k test-random-2g-1m test-2g-513k test-100m-512b: test-%: $(foreach app, $(apps), test-$(app)-%);
 
 test-%-random-100m-1k:
 	$(call test,$(*),true,$(call math, 100 << 20),$(call math, 1 << 10))

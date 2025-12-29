@@ -9,7 +9,7 @@
 ====
 
 性能测试结果显示MEMCACHED和UMEM-CACHE的缓存性能表现十分接近，有较高的命中率和较快的速度。
-UMEM-CACHE比REDIS和POGOCACHE在速度上快了60%以上，同时命中率还要高15%。
+UMEM-CACHE比REDIS和POGOCACHE在速度上快了66%左右，同时命中率还要高16%左右。
 
 MEMCACHED
 =========
@@ -82,14 +82,14 @@ UMEM-CACHE
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 1977711    hit_rate: 60.35% 
-	hot: 2621031    hit: 1925530    hit_rate: 73.46% 
-	VmHWM:  103828 kB    per_memory_hit_rate: 59.52%
-	79.524s
+	get: 3276800    hit: 1994647    hit_rate: 60.87% 
+	hot: 2621031    hit: 1941565    hit_rate: 74.08% 
+	VmHWM:  103956 kB    per_memory_hit_rate: 59.96%
+	79.476s
 	=======================================================
-	3276800	     24269 ns/op	      24527 hit/s/mem
+	3276800	     24254 ns/op	      24722 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	161.030s
+	ok  	github.com/imchuncai/umem-cache-benchmark	161.310s
 
 REDIS
 =====

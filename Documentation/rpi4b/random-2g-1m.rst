@@ -9,7 +9,7 @@ CONCLUSION
 ==========
 
 The test results showed that the performance of MEMCACHED, UMEM-CACHE, and REDIS
-are very close, and UMEM-CACHE's hit rate is about 11% higher than REDIS. And
+are very close, and UMEM-CACHE's hit rate is about 12% higher than REDIS. And
 POGOCACHE really not respect the memory limit, it used extra 50% of the memory.
 
 The reason that the performance is close among these apps, is that the cache
@@ -90,16 +90,16 @@ TEST RESULT
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:   16384    hot:    3276(20%)    hot_access: 80% 
-	get:   65536    hit:   45052    hit_rate: 68.74% 
-	hot:   52582    hit:   43685    hit_rate: 83.08% 
-	VmHWM: 2098444 kB    per_memory_hit_rate: 68.70%
-	213.693s
+	get:   65536    hit:   45057    hit_rate: 68.75% 
+	hot:   52582    hit:   43690    hit_rate: 83.09% 
+	VmHWM: 2098372 kB    per_memory_hit_rate: 68.71%
+	207.934s
 	=======================================================
-	65536	   3260696 ns/op	      211 hit/s/mem
+	65536	   3172826 ns/op	      217 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	424.134s
+	ok  	github.com/imchuncai/umem-cache-benchmark	418.542s
 
-	out IO speed: 843Mb/s
+	out IO speed: 867Mb/s
 
 REDIS
 =====
