@@ -10,8 +10,8 @@ github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/r
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
-github.com/imchuncai/umem-cache-client-Go v0.0.0-20251222054638-f7b9979e962f h1:Jf4ACq5zPV/IIYHX9sCUZSTvKEmqYP7S3a35rUMKnmo=
-github.com/imchuncai/umem-cache-client-Go v0.0.0-20251222054638-f7b9979e962f/go.mod h1:rTihSQDhY+WTskEihWtJW2t/IX2peLQGmC2PjSs1ceU=
+github.com/imchuncai/umem-cache-client-Go v0.0.0-20260123033022-236754e6ca43 h1:dfygTaDiWqHH997rR0G3bcl0UfrcO3iOK8Dg+VciekA=
+github.com/imchuncai/umem-cache-client-Go v0.0.0-20260123033022-236754e6ca43/go.mod h1:rTihSQDhY+WTskEihWtJW2t/IX2peLQGmC2PjSs1ceU=
 github.com/prometheus/procfs v0.17.0 h1:FuLQ+05u4ZI+SS/w9+BWEM2TXiHKsUQ9TADiRH7DuK0=
 github.com/prometheus/procfs v0.17.0/go.mod h1:oPQLaDAMRbA+u8H5Pbfq+dl3VDAvHxMUOVhe0wYB2zw=
 github.com/redis/go-redis/v9 v9.11.0 h1:E3S08Gl/nJNn5vkxd2i78wZxWAPNZgUNTp8WIJUAiIs=

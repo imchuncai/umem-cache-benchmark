@@ -46,8 +46,8 @@ test-%-100m-512b:
 	$(call test,$(*),false,$(call math, 100 << 20),512)
 
 update:
-	git submodule update --init --recursive --remote
+	git submodule update --depth=1 --init --recursive --remote
 	cd memcached && ./autogen.sh && ./configure
 	$(MAKE) -j -C memcached
 	$(MAKE) -j -C redis
-	$(MAKE) -j -C pogocache
+	$(MAKE) -j NOMIMALLOC=1 -C pogocache
