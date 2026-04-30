@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+# Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 apps = Memcached UmemCache Pogocache Redis1 Redis2 Redis3 Redis4
 
@@ -14,6 +14,12 @@ PARALLELISM = 16
 
 math = $(shell echo "$$(( $(1) ))" )
 
+ifdef TLS
+	TLS = 1
+else
+	TLS = 0
+endif
+
 define test =
 	$(eval BENCHTIME := $(shell										\
 		if [[ $(2) = "true" ]]; then									\
@@ -23,11 +29,11 @@ define test =
 		fi))
 
 	@if [[ $(1) = "UmemCache" ]]; then				\
-		cd umem-cache && make -s MEM_LIMIT=$(3);		\
+		cd umem-cache && make -s MEM_LIMIT=$(3) TLS=$(TLS);	\
 	fi
 
 	go test -bench=^Benchmark$(1)$$ -benchtime=$(BENCHTIME)x  \
-	-args $(2) $(3) $(4) $(HOT_CASE_PERCENT) $(HOT_CASE_ACCESS_PERCENT) $(HOT_CASE_SERVER_MEMORY_PERCENT) $(PARALLELISM) $(REMOTE_IP)
+	-args $(2) $(3) $(4) $(HOT_CASE_PERCENT) $(HOT_CASE_ACCESS_PERCENT) $(HOT_CASE_SERVER_MEMORY_PERCENT) $(PARALLELISM) $(TLS) $(REMOTE_IP)
 	@echo ""
 endef
 
@@ -47,7 +53,7 @@ test-%-100m-512b:
 
 update:
 	git submodule update --depth=1 --init --recursive --remote
-	cd memcached && ./autogen.sh && ./configure
+	cd memcached && ./autogen.sh && ./configure --enable-tls
 	$(MAKE) -j -C memcached
-	$(MAKE) -j -C redis
+	$(MAKE) -j -C redis BUILD_TLS=yes
 	$(MAKE) -j NOMIMALLOC=1 -C pogocache

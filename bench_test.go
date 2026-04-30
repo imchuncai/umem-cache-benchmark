@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
-// Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+// Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"os/exec"
 	"strconv"
 	"sync/atomic"
@@ -23,13 +26,32 @@ const (
 	TIMEOUT   = 30 * time.Second
 )
 
+var TLS_CONFIG = func() *tls.Config {
+	cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+	if err != nil {
+		panic(err)
+	}
+
+	caCert, err := os.ReadFile("ca-cert.pem")
+	if err != nil {
+		panic(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      caCertPool,
+		// ServerName:   "nas.local",
+	}
+}()
+
 func percent(i, n int) float64 {
 	return float64(i) / float64(n) * 100
 }
 
 type GetOrSetFunc func(key []byte, i int, f func() []byte) ([]byte, error)
 
-type RunServer func(serverMemory int, kvSizeLimit int, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error)
+type RunServer func(serverMemory int, kvSizeLimit int, tlsEnable bool, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error)
 
 func __parallel(b *testing.B, pool *test.Pool, getOrSet GetOrSetFunc) (hot, hotMiss, miss uint64) {
 	b.RunParallel(func(p *testing.PB) {
@@ -130,13 +152,17 @@ func parallel(b *testing.B, run RunServer) {
 		b.Fatalf("bad arg parallelism")
 	}
 	b.SetParallelism(parallelism)
-
-	remoteIP := ""
-	if len(args) > 7 {
-		remoteIP = args[7]
+	tlsEnable, err := strconv.Atoi(args[7])
+	if err != nil {
+		b.Fatalf("bad arg tls")
 	}
 
-	cmds, getOrSet, err := run(serverMemory, kvSizeLimit, remoteIP)
+	remoteIP := ""
+	if len(args) > 8 {
+		remoteIP = args[8]
+	}
+
+	cmds, getOrSet, err := run(serverMemory, kvSizeLimit, tlsEnable == 1, remoteIP)
 	if err != nil {
 		b.Fatalf("run server failed: %v", err)
 	}

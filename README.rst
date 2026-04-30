@@ -52,25 +52,25 @@ RANDOM-2G-1M
 ------------
 ::
 
-	make test-{APP}-random-2g-1m REMOTE_IP=[::1]
+	make test-{APP}-random-2g-1m TLS=0 REMOTE_IP=[::1]
 
 RANDOM-100M-1K
 --------------
 ::
 
-	make test-{APP}-random-100m-1k REMOTE_IP=[::1]
+	make test-{APP}-random-100m-1k TLS=0 REMOTE_IP=[::1]
 
 2G-513K
 -------
 ::
 
-	make test-{APP}-2g-513k REMOTE_IP=[::1]
+	make test-{APP}-2g-513k TLS=0 REMOTE_IP=[::1]
 
 100M-512B
 ---------
 ::
 
-	make test-{APP}-100m-512b REMOTE_IP=[::1]
+	make test-{APP}-100m-512b TLS=0 REMOTE_IP=[::1]
 
 TEST RESULT
 ===========

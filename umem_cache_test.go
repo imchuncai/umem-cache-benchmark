@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
-// Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+// Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os/exec"
 	"strconv"
@@ -14,13 +15,22 @@ import (
 
 const UMEM_CACHE_PORT = 10047
 
-func runUmemCacheServer(serverMemory int, kvSizeLimit int, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error) {
+func runUmemCacheServer(serverMemory int, kvSizeLimit int, tlsEnabled bool, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error) {
 	var cmd []*exec.Cmd
 	if remoteIP == "" {
-		cmd = []*exec.Cmd{exec.Command("umem-cache/umem-cache", strconv.Itoa(UMEM_CACHE_PORT))}
+		args := []string{strconv.Itoa(UMEM_CACHE_PORT)}
+		if tlsEnabled {
+			args = append(args, "cert.pem", "key.pem", "ca-cert.pem")
+		}
+		cmd = []*exec.Cmd{exec.Command("umem-cache/umem-cache", args...)}
 		remoteIP = "[::1]"
 	}
-	client, err := client.New(fmt.Sprintf("%s:%d", remoteIP, UMEM_CACHE_PORT), client.Config{TIMEOUT, 4, 0, nil})
+
+	var tlsConfig *tls.Config
+	if tlsEnabled {
+		tlsConfig = TLS_CONFIG
+	}
+	client, err := client.New(fmt.Sprintf("%s:%d", remoteIP, UMEM_CACHE_PORT), client.Config{TIMEOUT, 4, 0, tlsConfig})
 	if err != nil {
 		return nil, nil, fmt.Errorf("new client failed: %w", err)
 	}

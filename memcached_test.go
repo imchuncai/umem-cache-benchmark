@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
-// Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+// Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"fmt"
 	"math"
+	"net"
 	"os/exec"
 	"testing"
 	"unsafe"
@@ -15,7 +18,7 @@ import (
 
 const MEMCACHED_PORT = 11211
 
-func runMemcachedServer(serverMemory int, kvSizeLimit int, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error) {
+func runMemcachedServer(serverMemory int, kvSizeLimit int, tlsEnabled bool, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error) {
 	var cmd []*exec.Cmd
 	if remoteIP == "" {
 		itemLimit := kvSizeLimit * 2 >> 20 << 20
@@ -23,17 +26,35 @@ func runMemcachedServer(serverMemory int, kvSizeLimit int, remoteIP string) ([]*
 			// can't set max-item-size below that
 			itemLimit = 1 << 20
 		}
-		cmd = []*exec.Cmd{exec.Command("./memcached/memcached",
+		args := []string{
 			fmt.Sprintf("-t %d", THREAD_NR),
 			"--conn-limit=512",
 			fmt.Sprintf("--memory-limit=%d", serverMemory>>20),
 			fmt.Sprintf("--max-item-size=%d", itemLimit),
-		)}
+		}
+		if tlsEnabled {
+			args = append(args,
+				"--enable-ssl",
+				"-o ssl_chain_cert=cert.pem",
+				"-o ssl_key=key.pem",
+				"-o ssl_ca_cert=ca-cert.pem",
+				"-o ssl_kernel_tls",
+				"-o ssl_verify_mode=2",
+			)
+		}
+		cmd = []*exec.Cmd{exec.Command("./memcached/memcached", args...)}
 		remoteIP = "[::1]"
 	}
 	client := memcache.New(fmt.Sprintf("%s:%d", remoteIP, MEMCACHED_PORT))
 	client.Timeout = TIMEOUT
 	client.MaxIdleConns = math.MaxInt
+	if tlsEnabled {
+		client.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			var td tls.Dialer
+			td.Config = TLS_CONFIG
+			return td.DialContext(ctx, network, addr)
+		}
+	}
 
 	getOrSet := func(key []byte, i int, fallbackVal func() []byte) ([]byte, error) {
 		strKey := stringKey(key)
