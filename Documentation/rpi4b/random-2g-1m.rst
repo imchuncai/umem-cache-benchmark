@@ -42,7 +42,7 @@ TEST RESULT
 ::
 
 	go test -bench=^BenchmarkMemcached$ -benchtime=65536x		       \
-	-args true 2147483648 1048576 20 80 80 16 [fe80::4038:6954:f1a3:4d0f%end0]
+	-args true 2147483648 1048576 20 80 80 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
@@ -83,7 +83,7 @@ TEST RESULT
 ::
 
 	go test -bench=^BenchmarkUmemCache$ -benchtime=65536x		       \
-	-args true 2147483648 1048576 20 80 80 16 [fe80::4038:6954:f1a3:4d0f%end0]
+	-args true 2147483648 1048576 20 80 80 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
@@ -125,7 +125,7 @@ TEST RESULT
 ::
 
 	go test -bench=^BenchmarkRedis1$ -benchtime=65536x		       \
-	-args true 2147483648 1048576 20 80 80 16 [fe80::4038:6954:f1a3:4d0f%end0]
+	-args true 2147483648 1048576 20 80 80 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
@@ -166,7 +166,7 @@ TEST RESULT
 ::
 
 	go test -bench=^BenchmarkPogocache$ -benchtime=65536x		       \
-	-args true 2147483648 1048576 20 80 80 16 192.168.101.10
+	-args true 2147483648 1048576 20 80 80 16 0 192.168.101.10
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
