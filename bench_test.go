@@ -205,9 +205,9 @@ func parallel(b *testing.B, run RunServer) {
 	vmHWM := getVmHWM(b, cmds)
 	hitRate := percent(hit, b.N)
 	fmt.Printf("\n   =======================================================\n"+
-		"    case:%8d"+"    hot:%8d(%d%%)"+"    hot_access: %d%% \n"+
-		"     get:%8d"+"    hit:%8d"+"    hit_rate: %.2f%% \n"+
-		"     hot:%8d"+"    hit:%8d"+"    hit_rate: %.2f%% \n"+
+		"    case:%8d"+"    hot:%8d(%d%%)"+"    hot_access: %d%%\n"+
+		"     get:%8d"+"    hit:%8d"+"    hit_rate: %.2f%%\n"+
+		"     hot:%8d"+"    hit:%8d"+"    hit_rate: %.2f%%\n"+
 		"     VmHWM: %7d kB    per_memory_hit_rate: %.2f%%\n"+
 		"     %.3fs\n"+
 		"   =======================================================\n",

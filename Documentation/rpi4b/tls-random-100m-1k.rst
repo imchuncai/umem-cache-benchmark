@@ -8,8 +8,8 @@ BENCHMARK-TLS-RANDOM-100M-1K
 CONCLUSION
 ==========
 
-The test results showed that performance of UMEM-CACHE is the best, is about
-28% faster than MEMCACHED and about 99% faster than REDIS.
+The test results showed that performance of UMEM-CACHE is the best.
+UMEM-CACHE is about 51% faster than MEMCACHED and about 88% faster than REDIS.
 
 MEMCACHED
 =========
@@ -58,7 +58,7 @@ UMEM-CACHE
 ==========
 ::
 
-	commit 53f97eb219364fb18e15431e069b2ceef877b5d9
+	commit 884c97a8b7c382d9e94996663b1a2f6133fb9488
 
 BUILD COMMAND
 -------------
@@ -84,14 +84,14 @@ TEST RESULT
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 1994629    hit_rate: 60.87% 
-	hot: 2621031    hit: 1941555    hit_rate: 74.08% 
-	VmHWM:	109680 kB    per_memory_hit_rate: 56.83%
-	113.924s
+	get: 3276800    hit: 2271863    hit_rate: 69.33% 
+	hot: 2621031    hit: 2238696    hit_rate: 85.41% 
+	VmHWM:  109420 kB    per_memory_hit_rate: 64.88%
+	109.663s
 	=======================================================
-	3276800	     34767 ns/op	      16346 hit/s/mem
+	3276800	     33467 ns/op	      19388 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	233.692s
+	ok  	github.com/imchuncai/umem-cache-benchmark	226.026s
 
 REDIS
 =====
@@ -110,12 +110,12 @@ RUN COMMAND
 ::
 
 	./src/redis-server --protected-mode no --appendonly no --save ""	\
-	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lru	\
+	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lfu	\
 	--port 0 --tls-port 6379 --tls-cert-file cert.pem			\
-	--tls-key-file key.pem--tls-ca-cert-file ca-cert.pem
+	--tls-key-file key.pem --tls-ca-cert-file ca-cert.pem
 
 	./src/redis-server --protected-mode no --appendonly no --save ""	\
-	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lru	\
+	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lfu	\
 	--port 0 --tls-port 6380 --tls-cert-file cert.pem			\
 	--tls-key-file key.pem --tls-ca-cert-file ca-cert.pem
 
@@ -131,15 +131,15 @@ TEST RESULT
 	BenchmarkRedis2-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 1902724    hit_rate: 58.07% 
-	hot: 2621031    hit: 1851111    hit_rate: 70.63% 
-	VmHWM:	 67664 kB    per_memory_hit_rate: 43.89%
-	VmHWM:	 67808 kB
-	174.738s
+	get: 3276800    hit: 2218327    hit_rate: 67.70% 
+	hot: 2621031    hit: 2187646    hit_rate: 83.47% 
+	VmHWM:   67628 kB    per_memory_hit_rate: 51.30%
+	VmHWM:   67500 kB
+	162.587s
 	=======================================================
-	3276800	     53326 ns/op	      8231 hit/s/mem
+	3276800	     49617 ns/op	      10339 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	352.566s
+	ok  	github.com/imchuncai/umem-cache-benchmark	330.835s
 
 POGOCACHE
 =========

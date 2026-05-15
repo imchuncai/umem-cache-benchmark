@@ -22,7 +22,7 @@ func __runRedisServerCmd(serverMemory int, port int, tlsEnabled bool) *exec.Cmd 
 		`--save ""`,
 		fmt.Sprintf("--maxmemory %d", serverMemory),
 		"--maxclients 512",
-		"--maxmemory-policy allkeys-lru",
+		"--maxmemory-policy allkeys-lfu",
 	}
 	if tlsEnabled {
 		args = append(args,

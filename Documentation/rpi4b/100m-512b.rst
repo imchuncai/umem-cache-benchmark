@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 ===================
 BENCHMARK-100M-512B
@@ -8,9 +8,8 @@ BENCHMARK-100M-512B
 CONCLUSION
 ==========
 
-The test results showed that performance of MEMCACHED and UMEM-CACHE are very
-close, they all got very high hit rate and speed. And UMEM-CACHE is at least 70%
-faster than REDIS and POGOCACHE, and hit rate is 19% higher.
+The test results showed that performance of UMEM-CACHE is the best.
+UMEM-CACHE is about 19% faster than MEMCACHED and about 75% faster than REDIS.
 
 MEMCACHED
 =========
@@ -57,7 +56,7 @@ UMEM-CACHE
 ==========
 ::
 
-	commit 53f97eb219364fb18e15431e069b2ceef877b5d9
+	commit 884c97a8b7c382d9e94996663b1a2f6133fb9488
 
 BUILD COMMAND
 -------------
@@ -83,14 +82,14 @@ TEST RESULT
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 2033070    hit_rate: 62.04% 
-	hot: 2621158    hit: 1977812    hit_rate: 75.46% 
-	VmHWM:  103700 kB    per_memory_hit_rate: 61.26%
-	77.674s
+	get: 3276800    hit: 2311604    hit_rate: 70.54% 
+	hot: 2621158    hit: 2276377    hit_rate: 86.85% 
+	VmHWM:  103700 kB    per_memory_hit_rate: 69.66%
+	76.722s
 	=======================================================
-	3276800	     23704 ns/op	      25846 hit/s/mem
+	3276800	     23414 ns/op	      29752 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	157.925s
+	ok  	github.com/imchuncai/umem-cache-benchmark	156.926s
 
 REDIS
 =====
@@ -109,10 +108,10 @@ RUN COMMAND
 ::
 
 	./src/redis-server --protected-mode no --appendonly no --save ""       \
-	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lru --port 6379
+	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lfu --port 6379
 
 	./src/redis-server --protected-mode no --appendonly no --save ""       \
-	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lru --port 6380
+	--maxmemory 52428800 --maxclients 512 --maxmemory-policy allkeys-lfu --port 6380
 
 TEST RESULT
 -----------
@@ -126,15 +125,15 @@ TEST RESULT
 	BenchmarkRedis2-4   	
 	=======================================================
 	case:  819200    hot:  163840(20%)    hot_access: 80% 
-	get: 3276800    hit: 1922697    hit_rate: 58.68% 
-	hot: 2621158    hit: 1870028    hit_rate: 71.34% 
-	VmHWM:   60464 kB    per_memory_hit_rate: 49.74%
-	VmHWM:   60336 kB
-	108.226s
+	get: 3276800    hit: 2249377    hit_rate: 68.65% 
+	hot: 2621158    hit: 2218494    hit_rate: 84.64% 
+	VmHWM:   64024 kB    per_memory_hit_rate: 54.83%
+	VmHWM:   64184 kB
+	105.592s
 	=======================================================
-	3276800	     33028 ns/op	      15060 hit/s/mem
+	3276800	     32224 ns/op	      17014 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	218.471s
+	ok  	github.com/imchuncai/umem-cache-benchmark	215.315s
 
 POGOCACHE
 =========

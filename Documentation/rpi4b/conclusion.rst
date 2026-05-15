@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 ==========
 CONCLUSION
@@ -49,6 +49,7 @@ Pros
 ----
 
 - respects memory limit
+- high hit rate
 - arbitrary key
 - the maximum allowed key size is 512 MB
 - support pipeline
@@ -56,7 +57,6 @@ Pros
 Cons
 ----
 
-- low hit rate
 - slow
 - has inefficient use of memory issue
 

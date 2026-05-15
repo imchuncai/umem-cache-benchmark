@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 ====
 结论
@@ -49,6 +49,7 @@ REDIS
 ----
 
 - 尊重内存限制
+- 高命中率
 - 键可由任意字节组成
 - 键的长度上限是512兆字节
 - 支持pipeline
@@ -56,7 +57,6 @@ REDIS
 缺点
 ----
 
-- 低命中率
 - 慢
 - 存在内存使用不充分的问题
 

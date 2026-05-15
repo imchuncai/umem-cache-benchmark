@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 =====================
 基准测试-随机大小-2G-1M
@@ -8,8 +8,8 @@
 结论
 ====
 
-性能测试结果显示UMEM-CACHE，MEMCACHED和REDIS三者的缓存性能表现十分接近，UMEM-CACHE比
-REDIS命中率高12%左右。POGOCACHE完全没有限制内存使用量，它多用了50%的内存。
+性能测试结果显示UMEM-CACHE，MEMCACHED和REDIS三者的缓存性能表现十分接近。
+POGOCACHE完全没有限制内存使用量，它多用了50%的内存。
 
 这些应用的性能如此接近是因为缓存的值比较大，此时的性能瓶颈在服务端网络输出。服务端网络输出的速度
 已经高于850Mb/s，而我们处于千兆网络中。
@@ -61,7 +61,7 @@ UMEM-CACHE
 ==========
 ::
 
-	commit 53f97eb219364fb18e15431e069b2ceef877b5d9
+	commit 884c97a8b7c382d9e94996663b1a2f6133fb9488
 
 编译命令
 -------
@@ -87,16 +87,16 @@ UMEM-CACHE
 	BenchmarkUmemCache-4   	
 	=======================================================
 	case:   16384    hot:    3276(20%)    hot_access: 80% 
-	get:   65536    hit:   45057    hit_rate: 68.75% 
-	hot:   52582    hit:   43690    hit_rate: 83.09% 
-	VmHWM: 2098372 kB    per_memory_hit_rate: 68.71%
-	207.934s
+	get:   65536    hit:   46968    hit_rate: 71.67% 
+	hot:   52582    hit:   45736    hit_rate: 86.98% 
+	VmHWM: 2098272 kB    per_memory_hit_rate: 71.63%
+	217.548s
 	=======================================================
-	65536	   3172826 ns/op	      217 hit/s/mem
+	65536	   3319521 ns/op	      216 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	418.542s
+	ok  	github.com/imchuncai/umem-cache-benchmark	440.562s
 
-	out IO speed: 867Mb/s
+	out IO speed: 864Mb/s
 
 REDIS
 =====
@@ -115,7 +115,7 @@ REDIS
 ::
 
 	./src/redis-server --protected-mode no --appendonly no --save ""       \
-	--maxmemory 2147483648 --maxclients 512 --maxmemory-policy allkeys-lru --port 6379
+	--maxmemory 2147483648 --maxclients 512 --maxmemory-policy allkeys-lfu --port 6379
 
 测试结果
 -------
@@ -129,16 +129,16 @@ REDIS
 	BenchmarkRedis1-4   	
 	=======================================================
 	case:   16384    hot:    3276(20%)    hot_access: 80% 
-	get:   65536    hit:   41561    hit_rate: 63.42% 
-	hot:   52582    hit:   40311    hit_rate: 76.66% 
-	VmHWM: 2159772 kB    per_memory_hit_rate: 61.58%
-	195.393s
+	get:   65536    hit:   47358    hit_rate: 72.26% 
+	hot:   52582    hit:   46514    hit_rate: 88.46% 
+	VmHWM: 2089732 kB    per_memory_hit_rate: 72.26%
+	217.346s
 	=======================================================
-	65536	   2981461 ns/op	      207 hit/s/mem
+	65536	   3316434 ns/op	      218 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	389.165s
+	ok  	github.com/imchuncai/umem-cache-benchmark	428.759s
 
-	out IO speed: 851Mb/s
+	out IO speed: 872Mb/s
 
 POGOCACHE
 =========

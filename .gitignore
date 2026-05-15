@@ -1,2 +1,3 @@
 Documentation/fedora/
 *.pem
+.vscode

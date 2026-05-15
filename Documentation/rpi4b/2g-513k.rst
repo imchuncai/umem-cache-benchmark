@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 =================
 BENCHMARK-2G-513K
@@ -9,9 +9,8 @@ CONCLUSION
 ==========
 
 The test results showed that the performance of MEMCACHED, UMEM-CACHE, and REDIS
-are very close, and MEMCACHED's hit rate is about 25% higher than REDIS. But
-REDIS only used 82% of the configured memory. And POGOCACHE really not respect
-the memory limit, it used more than 40% of the limitation.
+are very close. But REDIS only used 82% of the configured memory. And POGOCACHE
+really not respect the memory limit, it used more than 40% of the limitation.
 
 The reason that the performance is close among these apps, is that the cache
 value is relatively large, the performance bottleneck is at the server size
@@ -65,7 +64,7 @@ UMEM-CACHE
 ==========
 ::
 
-	commit 53f97eb219364fb18e15431e069b2ceef877b5d9
+	commit 884c97a8b7c382d9e94996663b1a2f6133fb9488
 
 BUILD COMMAND
 -------------
@@ -90,17 +89,17 @@ TEST RESULT
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkUmemCache-4   	
 	=======================================================
-	case:   16352    hot:    3270(20%)    hot_access: 80% 
-	get:   65408    hit:   44565    hit_rate: 68.13% 
-	hot:   52259    hit:   43197    hit_rate: 82.66% 
-	VmHWM: 2097120 kB    per_memory_hit_rate: 68.13%
-	206.207s
+	case:   16352    hot:    3270(20%)    hot_access: 80%
+	get:   65408    hit:   46596    hit_rate: 71.24%
+	hot:   52259    hit:   45352    hit_rate: 86.78%
+	VmHWM:	 2097136 kB    per_memory_hit_rate: 71.24%
+	216.065s
 	=======================================================
-	65408	   3152627 ns/op	      216 hit/s/mem
+	65408	   3303341 ns/op	      216 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	414.993s
+	ok  	github.com/imchuncai/umem-cache-benchmark	439.244s
 
-	out IO speed: 866Mb/s
+	out IO speed: 864Mb/s
 
 REDIS
 =====
@@ -119,7 +118,7 @@ RUN COMMAND
 ::
 
 	./src/redis-server --protected-mode no --appendonly no --save ""       \
-	--maxmemory 2147483648 --maxclients 512 --maxmemory-policy allkeys-lru --port 6379
+	--maxmemory 2147483648 --maxclients 512 --maxmemory-policy allkeys-lfu --port 6379
 
 TEST RESULT
 -----------
@@ -133,16 +132,16 @@ TEST RESULT
 	BenchmarkRedis1-4   	
 	=======================================================
 	case:   16352    hot:    3270(20%)    hot_access: 80% 
-	get:   65408    hit:   36899    hit_rate: 56.41% 
-	hot:   52259    hit:   35923    hit_rate: 68.74% 
-	VmHWM: 1709896 kB    per_memory_hit_rate: 56.41%
-	173.986s
+	get:   65408    hit:   43076    hit_rate: 65.86% 
+	hot:   52259    hit:   42492    hit_rate: 81.31% 
+	VmHWM: 1710360 kB    per_memory_hit_rate: 65.86%
+	198.119s
 	=======================================================
-	65408	   2660009 ns/op	      212 hit/s/mem
+	65408	   3028965 ns/op	      217 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	351.977s
+	ok  	github.com/imchuncai/umem-cache-benchmark	395.208s
 
-	out IO speed: 850Mb/s
+	out IO speed: 871Mb/s
 
 POGOCACHE
 =========
