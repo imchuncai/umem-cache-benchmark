@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: BSD-3-Clause
 .. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
-===============
-基准测试-2g-513k
-===============
+====================
+基准测试-random-2g-8k
+====================
 
 结论
 ====
 ::
 
-	Umem-cache的命中率比Memcached高11%，比Redis高11%。
-	Umem-cache的命中吞吐量比Memcached高6%，比Redis高10%。
-
-	注意：网络吞吐量已经接近千兆网络的极限。
-	注意：Redis只用了82%的内存。
+	Umem-cache的命中率比Memcached高8%，比Redis高12%。
+	Umem-cache的命中吞吐量比Memcached高23%，比Redis高32%。
 
 Memcached
 =========
@@ -40,20 +37,20 @@ Memcached
 -------
 ::
 
-	go test -bench=^BenchmarkMemcached$ -benchtime=65408x \
-	-args false 2147483648 525312 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
+	go test -bench=^BenchmarkMemcached$ -benchtime=8388608x \
+	-args true 2147483648 8192 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkMemcached-4   	
 	======================================================================
-	server:     4088    warmup:    65408    get:    65408    hit:    31063
-	VmHWM: 2111180 kB   hit_rate: 47.49%    per_memory_hit_rate: 47.18%
-	172.837s	    output:  796 Mb/s   input:  720 Mb/s
+	server:   524288    warmup:  8388608    get:  8388608    hit:  4971498
+	VmHWM: 2110052 kB   hit_rate: 59.26%    per_memory_hit_rate: 58.90%
+	462.127s	    output:  233 Mb/s   input:  356 Mb/s
 	======================================================================
-	   65408	   2642444 ns/op	       179 hit/s/mem
+	 8388608	     55090 ns/op	     10692 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	347.316s
+	ok  	github.com/imchuncai/umem-cache-benchmark	936.017s
 
 Umem-cache
 ==========
@@ -77,20 +74,20 @@ Umem-cache
 -------
 ::
 
-	go test -bench=^BenchmarkUmemCache$ -benchtime=65408x \
-	-args false 2147483648 525312 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
+	go test -bench=^BenchmarkUmemCache$ -benchtime=8388608x \
+	-args true 2147483648 8192 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkUmemCache-4   	
 	======================================================================
-	server:     4088    warmup:    65408    get:    65408    hit:    34303
-	VmHWM: 2097304 kB   hit_rate: 52.44%    per_memory_hit_rate: 52.44%
-	180.568s	    output:  690 Mb/s   input:  761 Mb/s
+	server:   524288    warmup:  8388608    get:  8388608    hit:  5355767
+	VmHWM: 2098884 kB   hit_rate: 63.85%    per_memory_hit_rate: 63.79%
+	407.248s	    output:  234 Mb/s   input:  435 Mb/s
 	======================================================================
-	   65408	   2760648 ns/op	       190 hit/s/mem
+	 8388608	     48548 ns/op	     13140 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	364.345s
+	ok  	github.com/imchuncai/umem-cache-benchmark	829.725s
 
 Redis
 =====
@@ -120,18 +117,18 @@ Redis
 -------
 ::
 
-	go test -bench=^BenchmarkRedis2$ -benchtime=65408x \
-	-args false 2147483648 525312 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
+	go test -bench=^BenchmarkRedis2$ -benchtime=8388608x \
+	-args true 2147483648 8192 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkRedis2-4   	
 	======================================================================
-	server:     4088    warmup:    65408    get:    65408    hit:    30918
-	VmHWM:  861320 kB   hit_rate: 47.27%    per_memory_hit_rate: 47.27%
-	VmHWM:  860392 kB
-	178.438s	    output:  775 Mb/s   input:  694 Mb/s
+	server:   524288    warmup:  8388608    get:  8388608    hit:  4945884
+	VmHWM: 1086360 kB   hit_rate: 58.96%    per_memory_hit_rate: 56.92%
+	VmHWM: 1085976 kB
+	478.144s	    output:  226 Mb/s   input:  344 Mb/s
 	======================================================================
-	   65408	   2728070 ns/op	       173 hit/s/mem
+	 8388608	     56999 ns/op	      9986 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	361.929s
+	ok  	github.com/imchuncai/umem-cache-benchmark	969.150s

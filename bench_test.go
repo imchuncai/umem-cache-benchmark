@@ -4,219 +4,178 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"flag"
 	"fmt"
+	"hash/fnv"
+	"math"
+	"math/bits"
+	"math/rand/v2"
 	"os"
-	"os/exec"
 	"strconv"
 	"sync/atomic"
-	"syscall"
 	"testing"
 	"time"
-
-	"github.com/imchuncai/umem-cache-benchmark/test"
-	"github.com/prometheus/procfs"
 )
 
 const (
 	THREAD_NR = 4
 	TIMEOUT   = 30 * time.Second
+	SEED      = 47
 )
 
-var TLS_CONFIG = func() *tls.Config {
-	cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
-	if err != nil {
-		panic(err)
-	}
-
-	caCert, err := os.ReadFile("ca-cert.pem")
-	if err != nil {
-		panic(err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-	return &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		RootCAs:      caCertPool,
-		// ServerName:   "nas.local",
-	}
-}()
-
-func percent(i, n int) float64 {
-	return float64(i) / float64(n) * 100
+type Client interface {
+	Init(remoteIPV6 string, config *tls.Config) error
+	GetOrSet(key []byte, i uint64, fallbackVal func() []byte) ([]byte, error)
 }
 
-type GetOrSetFunc func(key []byte, i int, f func() []byte) ([]byte, error)
+func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeLimit uint32, randSize bool) (
+	throughput uint64, output uint64, miss uint64) {
+	// key size is rand from 16~47 bytes
+	if kvSizeLimit < 47 {
+		panic("bad kvSizeLimit")
+	}
 
-type RunServer func(serverMemory int, kvSizeLimit int, tlsEnable bool, remoteIP string) ([]*exec.Cmd, GetOrSetFunc, error)
+	// make the benchmark result as stable as possible
+	var atomicI atomic.Uint64
+	atomicI.Store(math.MaxUint64)
+	indexes := make([]uint64, b.N)
+	for i := 0; i < b.N; i++ {
+		indexes[i] = zipf.Uint64()
+	}
 
-func __parallel(b *testing.B, pool *test.Pool, getOrSet GetOrSetFunc) (hot, hotMiss, miss uint64) {
+	const hex = "0123456789abcdef"
+	kvTemplate := make([]byte, kvSizeLimit)
+	for i := 0; i < len(kvTemplate); i += len(hex) {
+		copy(kvTemplate[i:], hex)
+	}
+
+	KvSize := func(h uint64, keyLen uint32) uint32 {
+		return kvSizeLimit
+	}
+	if randSize {
+		KvSize = func(h uint64, keyLen uint32) uint32 {
+			hi, _ := bits.Mul32(uint32(h>>32), kvSizeLimit-keyLen)
+			return hi + keyLen
+		}
+	}
+
+	b.StartTimer()
+	b.ResetTimer()
+	defer b.StopTimer()
 	b.RunParallel(func(p *testing.PB) {
-		var __hot, __hotMiss, __miss uint64
-
+		s := bytes.Clone(kvTemplate)
+		r := fnv.New64a()
+		var __throughput, __output, __miss uint64
 		for p.Next() {
-			tc := pool.RandCase()
-			if tc.Hot {
-				__hot++
+			index := indexes[atomicI.Add(1)]
+			for i := 0; i < 16; i++ {
+				s[i] = hex[(index>>(i<<2))&0xf]
 			}
-			fallbackGet := func() []byte {
-				if tc.Hot {
-					__hotMiss++
-				}
+			r.Reset()
+			r.Write(s[:16])
+			h := r.Sum64()
+
+			keyLen := uint32(h)&31 + 16
+			fallbackVal := func() []byte {
 				__miss++
-				return tc.Val
+				kvSize := KvSize(h, keyLen)
+				__output += uint64(kvSize)
+				return s[keyLen:kvSize]
 			}
-			_, err := getOrSet(tc.Key, tc.I, fallbackGet)
+			val, err := client.GetOrSet(s[:keyLen], index, fallbackVal)
 			if err != nil {
 				b.Fatalf("got error: %v", err)
 			}
+			__throughput += uint64(keyLen) + uint64(len(val))
 		}
-
-		atomic.AddUint64(&hot, __hot)
-		atomic.AddUint64(&hotMiss, __hotMiss)
+		atomic.AddUint64(&throughput, __throughput)
+		atomic.AddUint64(&output, __output)
 		atomic.AddUint64(&miss, __miss)
 	})
 	return
 }
 
-func getVmHWM(b testing.TB, cmds []*exec.Cmd) uint64 {
-	vmHWM := uint64(0)
-	for _, cmd := range cmds {
-		p, err := procfs.NewProc(cmd.Process.Pid)
-		if err != nil {
-			b.Fatalf("get process failed: %v", err)
-		}
-
-		status, err := p.NewStatus()
-		if err != nil {
-			b.Fatalf("get process status failed: %v", err)
-		}
-
-		vmHWM += status.VmHWM
-	}
-	return vmHWM
-}
-
-func stop(cmd *exec.Cmd) error {
-	if cmd.Process != nil {
-		err := cmd.Process.Signal(syscall.SIGTERM)
-		if err != nil {
-			return fmt.Errorf("signal SIGTERM failed: %w", err)
-		}
-		_, err = cmd.Process.Wait()
-		if err != nil {
-			return fmt.Errorf("wait failed: %w", err)
-		}
-	}
-	return nil
-}
-
-func parallel(b *testing.B, run RunServer) {
-	b.StopTimer()
-
+func parallel(b *testing.B, client Client) {
 	if b.N == 1 {
 		// benchmark is called twice, drop the first
 		return
 	}
 
 	args := flag.Args()
-	if len(args) < 4 {
-		b.Fatal("bad args")
+	if len(args) < 6 {
+		b.Fatal("bad args length")
 	}
 	randSize := args[0] == "true"
-	serverMemory, err := strconv.Atoi(args[1])
+	serverMemory, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
 		b.Fatalf("bad arg serverMemory: %s", args[1])
 	}
-	kvSizeLimit, err := strconv.Atoi(args[2])
-	if err != nil {
+	__kvSizeLimit, err := strconv.ParseUint(args[2], 10, 64)
+	if err != nil || __kvSizeLimit > math.MaxUint32 {
 		b.Fatalf("bad arg kvSizeLimit")
 	}
-	hotCasePercent, err := strconv.Atoi(args[3])
-	if err != nil {
-		b.Fatalf("bad arg hotCasePercent")
-	}
-	hotCaseAccessPercent, err := strconv.Atoi(args[4])
-	if err != nil {
-		b.Fatalf("bad arg hotCasePercent")
-	}
-	hotCaseServerMemoryPercent, err := strconv.Atoi(args[5])
-	if err != nil {
-		b.Fatalf("bad arg hotCaseServerMemoryPercent")
-	}
-	parallelism, err := strconv.Atoi(args[6])
+	kvSizeLimit := uint32(__kvSizeLimit)
+	parallelism, err := strconv.Atoi(args[3])
 	if err != nil {
 		b.Fatalf("bad arg parallelism")
 	}
 	b.SetParallelism(parallelism)
-	tlsEnable, err := strconv.Atoi(args[7])
+	tlsEnable, err := strconv.Atoi(args[4])
 	if err != nil {
 		b.Fatalf("bad arg tls")
 	}
+	remoteIP := args[5]
 
-	remoteIP := ""
-	if len(args) > 8 {
-		remoteIP = args[8]
+	var config *tls.Config
+	if tlsEnable == 1 {
+		cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+		if err != nil {
+			b.Fatalf("load tls key pair failed: %v", err)
+		}
+		caCert, err := os.ReadFile("ca-cert.pem")
+		if err != nil {
+			b.Fatalf("read tls file: ca-cert.pem failed: %v", err)
+		}
+		caCertPool := x509.NewCertPool()
+		if !caCertPool.AppendCertsFromPEM(caCert) {
+			b.Fatal("tls append certs failed")
+		}
+		config = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			RootCAs:      caCertPool,
+			ServerName:   "nas.local",
+		}
 	}
 
-	cmds, getOrSet, err := run(serverMemory, kvSizeLimit, tlsEnable == 1, remoteIP)
+	err = client.Init(remoteIP, config)
 	if err != nil {
-		b.Fatalf("run server failed: %v", err)
-	}
-	defer func() {
-		var err error
-		for i, cmd := range cmds {
-			e := stop(cmd)
-			if e != nil {
-				err = errors.Join(err, fmt.Errorf("stop machine: %d failed: %w", i, e))
-			}
-		}
-		if err != nil {
-			b.Fatalf("stop failed: %v", err)
-		}
-	}()
-	for _, cmd := range cmds {
-		err := cmd.Start()
-		if err != nil {
-			b.Fatalf("start server failed: %v", err)
-		}
-	}
-	time.Sleep(100 * time.Millisecond)
-	for _, cmd := range cmds {
-		err = cmd.Process.Signal(syscall.Signal(0))
-		if err != nil {
-			b.Fatalf("server exited early: %v", err)
-		}
+		b.Fatalf("client init failed: %v", err)
 	}
 
-	pool := test.NewPool(kvSizeLimit, randSize, serverMemory, hotCasePercent, hotCaseAccessPercent, hotCaseServerMemoryPercent)
+	cap := serverMemory / uint64(kvSizeLimit)
+	if randSize {
+		cap *= 2
+	}
+	r := rand.New(rand.NewPCG(SEED, SEED))
+	zipf := rand.NewZipf(r, 1.0001, 1.0, cap*1000)
+
 	// warmup
-	__parallel(b, pool, getOrSet)
+	__parallel(b, client, zipf, kvSizeLimit, randSize)
 
-	b.StartTimer()
-	hot, hotMiss, miss := __parallel(b, pool, getOrSet)
-	b.StopTimer()
-
+	throughput, output, miss := __parallel(b, client, zipf, kvSizeLimit, randSize)
 	hit := b.N - int(miss)
-	hotHit := hot - hotMiss
-	vmHWM := getVmHWM(b, cmds)
-	hitRate := percent(hit, b.N)
-	fmt.Printf("\n   =======================================================\n"+
-		"    case:%8d"+"    hot:%8d(%d%%)"+"    hot_access: %d%%\n"+
-		"     get:%8d"+"    hit:%8d"+"    hit_rate: %.2f%%\n"+
-		"     hot:%8d"+"    hit:%8d"+"    hit_rate: %.2f%%\n"+
-		"     VmHWM: %7d kB    per_memory_hit_rate: %.2f%%\n"+
-		"     %.3fs\n"+
-		"   =======================================================\n",
-		pool.CaseN(), pool.HotN(), hotCasePercent, hotCaseAccessPercent,
-		b.N, hit, percent(hit, b.N),
-		hot, hotHit, percent(int(hotHit), int(hot)),
-		vmHWM>>10, hitRate/float64(vmHWM)*float64(serverMemory),
-		b.Elapsed().Seconds(),
+	hitRate := float64(hit) / float64(b.N) * 100
+	fmt.Printf("\n======================================================================\n"+
+		"server: %8d    warmup: %8d    get: %8d    hit: %8d\n"+
+		"VmHWM: %7d kB   hit_rate: %.2f%%    per_memory_hit_rate: %.2f%%\n"+
+		"%.3fs\t    output: %4.0f Mb/s   input: %4.0f Mb/s\n"+
+		"======================================================================\n",
+		cap, b.N, b.N, hit, 0, hitRate, hitRate, b.Elapsed().Seconds(),
+		float64(output*8)/1024/1024/b.Elapsed().Seconds(),
+		float64((throughput-output)*8)/1024/1024/b.Elapsed().Seconds(),
 	)
-	hitF := float64(hit) / b.Elapsed().Seconds()
-	b.ReportMetric(hitF/float64(vmHWM)*float64(serverMemory), "hit/s/mem")
+	b.ReportMetric(float64(hit)/b.Elapsed().Seconds(), "hit/s/mem")
 }

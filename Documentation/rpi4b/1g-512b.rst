@@ -1,0 +1,134 @@
+.. SPDX-License-Identifier: BSD-3-Clause
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+
+=================
+Benchmark-1g-512b
+=================
+
+Conclusion
+==========
+::
+
+	Umem-cache's hit rate is 9% higher than Memcached and 15% higher than Redis.
+	Umem-cache's hit throughput is 13% higher than Memcached and 58% higher than Redis.
+
+Memcached
+=========
+::
+
+	commit f1674f0231e5d291db474c4ad297f5f069d32521
+
+Build Command
+-------------
+::
+
+	./autogen.sh
+	./configure --enable-tls
+	make -j
+
+Run Command
+-----------
+::
+
+	./memcached --conn-limit=512 --memory-limit=1024 \
+	--max-item-size=1048576 -t 4 -u root
+
+Test Result
+-----------
+::
+
+	go test -bench=^BenchmarkMemcached$ -benchtime=33554432x \
+	-args false 1073741824 512 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkMemcached-4   	
+	======================================================================
+	server:  2097152    warmup: 33554432    get: 33554432    hit: 20639602
+	VmHWM: 1069972 kB   hit_rate: 61.51%    per_memory_hit_rate: 60.28%
+	824.907s	    output:   61 Mb/s   input:   98 Mb/s
+	======================================================================
+	33554432	     24584 ns/op	     24520 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	1680.953s
+
+Umem-cache
+==========
+::
+
+	commit eeeac62ec7a2ec135b4f2e419a533ba8b3282ccc
+
+Build Command
+-------------
+::
+
+	make MEM_LIMIT=1073741824
+
+Run Command
+-----------
+::
+
+	./umem-cache 10047
+
+Test Result
+-----------
+::
+
+	go test -bench=^BenchmarkUmemCache$ -benchtime=33554432x \
+	-args false 1073741824 512 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkUmemCache-4   	
+	======================================================================
+	server:  2097152    warmup: 33554432    get: 33554432    hit: 22049305
+	VmHWM: 1049760 kB   hit_rate: 65.71%    per_memory_hit_rate: 65.64%
+	797.105s	    output:   56 Mb/s   input:  108 Mb/s
+	======================================================================
+	33554432	     23756 ns/op	     27631 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	1634.343s
+
+Redis
+=====
+::
+
+	commit 138263a1b480fcd2e756be27f369203a46481d06
+
+Build Command
+-------------
+::
+
+	make -j BUILD_TLS=yes
+
+Run Command
+-----------
+::
+
+	./src/redis-server --protected-mode no --appendonly no --save "" \
+	--maxmemory 536870912 --maxclients 512 --maxmemory-policy allkeys-lfu \
+	--port 6379
+
+	./src/redis-server --protected-mode no --appendonly no --save "" \
+	--maxmemory 536870912 --maxclients 512 --maxmemory-policy allkeys-lfu \
+	--port 6380
+
+Test Result
+-----------
+::
+
+	go test -bench=^BenchmarkRedis2$ -benchtime=33554432x \
+	-args false 1073741824 512 16 0 [fe80::4038:6954:f1a3:4d0f%end0]
+	goos: linux
+	goarch: arm64
+	pkg: github.com/imchuncai/umem-cache-benchmark
+	BenchmarkRedis2-4   	
+	======================================================================
+	server:  2097152    warmup: 33554432    get: 33554432    hit: 20241978
+	VmHWM:  554204 kB   hit_rate: 60.33%    per_memory_hit_rate: 57.06%
+	VmHWM:  554304 kB
+	1091.923s	    output:   48 Mb/s   input:   72 Mb/s
+	======================================================================
+	33554432	     32542 ns/op	     17536 hit/s/mem
+	PASS
+	ok  	github.com/imchuncai/umem-cache-benchmark	2205.391s

@@ -1,39 +1,53 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 ====================
-UMEM-CACHE-BENCHMARK
+Umem-cache-benchmark
 ====================
 
-UMEM-CACHE-BENCHMARK is a benchmark project for user space in memory cache.
+Umem-cache-benchmark is a benchmark project for user space in memory cache.
+
+It is built to prove that `Umem-cache <https://github.com/imchuncai/umem-cache>`_ is the best cache in the world.
 
 Multilingual 多语言
 ==================
 
 - `简体中文 <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/translations/zh_CN/README.rst>`_
 
-RANDOM SIZE BENCHMARK
-=====================
+Benchmark
+=========
 
-We limit server memory to MEM_LIMIT, and test case size is set to 4 times of
-that, and the size of key and value is random in the range[0, KV_LIMIT]. We
-first get the value from the server, if the get missed, we store it. And 80% of
-the time the first 20% of the test cases are used.
+We will deploy the server and client on two separate machines.
 
-FIXED SIZE BENCHMARK
-====================
+In the following statement, the word *CAP* represents the theoretically maximum
+number of key-value pairs that the cache can hold.
 
-We limit server memory to MEM_LIMIT, and test case size is set to 4 times of
-that, and the size of key and value is KV_LIMIT. We first get the value from the
-server, if the get missed, we store it. And 80% of the time the first 20% of the
-test cases are used.
+Test Dataset
+------------
 
-SUPPORTED APPS
+The test dataset was generated using the Zipf variable generator from the Go
+standard library, with s=1.0001 and v=1.0.
+
+The size of the test dataset is 1000 times that of *CAP*.
+
+The length of each key in the test dataset is randomized between 16 and 47 bytes,
+a range representative of a production environment.
+
+Test Process
+------------
+
+Each batch of our tests contains *N* requests, where *N* is 16 times the *CAP*.
+For each request, we first get the value from the server, if the get missed,
+we store it.
+
+We first make *N* requests to the server to warm up the cache,
+and then make *N* more requests and collect statistics.
+
+Supported Apps
 ==============
 
 - Memcached
 - UmemCache
-- Pogocache
 - Redis1
 - Redis2
 - Redis3
@@ -45,37 +59,34 @@ multiple instances and distributing keys evenly across these instances.
 
 Note: we use APP's default port
 
-TEST COMMAND
+RPI4B
+=====
+
+Two 4GB version of Raspberry Pi 4 Model B connected in LAN with Gigabit network.
+One used as a server and the other as a client. And the installed operating
+system is Fedora-Server-40-1.14.aarch64.
+
+Test Result
+-----------
+
+Umem-cache demonstrates significant advantages across various aspects:
+
+.. [#] Hit rate is 8% to 14% higher than Memcached and 11% to 15% higher than Redis.
+.. [#] Without TLS enabled, hit throughput is 6% to 23% higher than Memcached and 10% to 58% higher than Redis.
+.. [#] With TLS enabled, hit throughput is 11% to 33% higher than Memcached and 9% to 81% higher than Redis.
+
+The details is at `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/rpi4b>`_ .
+
+Redis Issues
 ============
 
-RANDOM-2G-1M
-------------
-::
+In tests with a fixed key-value pair size of 513k bytes, Redis only used about
+80% of the memory.
 
-	make test-{APP}-random-2g-1m TLS=0 REMOTE_IP=[::1]
+Memcached Issues
+================
 
-RANDOM-100M-1K
---------------
-::
-
-	make test-{APP}-random-100m-1k TLS=0 REMOTE_IP=[::1]
-
-2G-513K
--------
-::
-
-	make test-{APP}-2g-513k TLS=0 REMOTE_IP=[::1]
-
-100M-512B
----------
-::
-
-	make test-{APP}-100m-512b TLS=0 REMOTE_IP=[::1]
-
-TEST RESULT
-===========
-
-We discovered a serious issue with memcached in our benchmark test, there is a
+We discovered a serious issue with Memcached in our benchmark test, there is a
 corner case that your set of a key will never succeed. Specifically, if you
 exhausted slab's storage space with chunk data allocated by big keys before
 storing any keys into it, you'll unable to store keys that meet the slab's items
@@ -105,12 +116,3 @@ size. It can be reproduced by following commands:
 
 	# this set can never be stored
 	printf "set 400 0 0 30000\r\n${a_30000}\r\n" | nc 127.0.0.1 11211
-
-RPI4B
------
-
-Two 4GB version of Raspberry Pi 4 Model B connected in LAN with Gigabit network.
-One used as a server and the other as a client. And the installed operating
-system is Fedora-Server-40-1.14.aarch64.
-
-Test result is at `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/rpi4b>`_ .
