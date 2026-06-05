@@ -62,9 +62,9 @@ Note: we use APP's default port
 RPI4B
 =====
 
-Two 4GB version of Raspberry Pi 4 Model B connected in LAN with Gigabit network.
-One used as a server and the other as a client. And the installed operating
-system is Fedora-Server-40-1.14.aarch64.
+Two 4GB version of Raspberry Pi 4 Model B with fans connected in LAN with
+Gigabit network. One used as a server and the other as a client. And the
+installed operating system is Fedora-Server-40-1.14.aarch64.
 
 Test Result
 -----------
