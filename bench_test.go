@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	THREAD_NR = 4
+	THREAD_NR = 3
 	TIMEOUT   = 30 * time.Second
 	SEED      = 47
 )
