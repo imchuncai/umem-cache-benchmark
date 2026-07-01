@@ -10,7 +10,7 @@
 ::
 
 	Umem-cache的命中率比Memcached高8%，比Redis高12%。
-	Umem-cache的命中吞吐量比Memcached高24%，比Redis高31%。
+	Umem-cache的命中吞吐量比Memcached高24%，比Redis高20%。
 
 Memcached
 =========
@@ -44,19 +44,19 @@ Memcached
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkMemcached-3   	
 	======================================================================
-	server:   524288    warmup:  8388608    get:  8388608    hit:  4972504
-	VmHWM: 2109712 kB   hit_rate: 59.28%    per_memory_hit_rate: 58.92%
-	444.308s	    output:  242 Mb/s   input:  371 Mb/s
+	server:   524288    warmup:  8388608    get:  8388608    hit:  4971757
+	VmHWM: 2109752 kB   hit_rate: 59.27%    per_memory_hit_rate: 58.91%
+	448.235s	    output:  240 Mb/s   input:  367 Mb/s
 	======================================================================
-	 8388608	     52966 ns/op	     11125 hit/s/mem
+	 8388608	     53434 ns/op	     11026 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	899.984s
+	ok  	github.com/imchuncai/umem-cache-benchmark	907.248s
 
 Umem-cache
 ==========
 ::
 
-	commit 855aee6d8e727184d9a23806597403ded1d941b4
+	commit e4a931ea3ee8fc82b3693333fa12a264e36f3dd0
 
 编译命令
 -------
@@ -81,13 +81,13 @@ Umem-cache
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkUmemCache-3   	
 	======================================================================
-	server:   524288    warmup:  8388608    get:  8388608    hit:  5364253
-	VmHWM: 2098776 kB   hit_rate: 63.95%    per_memory_hit_rate: 63.90%
-	389.924s	    output:  243 Mb/s   input:  455 Mb/s
+	server:   524288    warmup:  8388608    get:  8388608    hit:  5364257
+	VmHWM: 2098796 kB   hit_rate: 63.95%    per_memory_hit_rate: 63.90%
+	392.144s	    output:  242 Mb/s   input:  453 Mb/s
 	======================================================================
-	 8388608	     46483 ns/op	     13747 hit/s/mem
+	 8388608	     46747 ns/op	     13669 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	793.432s
+	ok  	github.com/imchuncai/umem-cache-benchmark	797.183s
 
 Redis
 =====
@@ -124,11 +124,11 @@ Redis
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkRedis2-3   	
 	======================================================================
-	server:   524288    warmup:  8388608    get:  8388608    hit:  4950236
-	VmHWM: 1085300 kB   hit_rate: 59.01%    per_memory_hit_rate: 57.00%
-	VmHWM: 1085836 kB
-	456.566s	    output:  236 Mb/s   input:  360 Mb/s
+	server:   524288    warmup:  8388608    get:  8388608    hit:  4957479
+	VmHWM: 1085036 kB   hit_rate: 59.10%    per_memory_hit_rate: 57.08%
+	VmHWM: 1086236 kB
+	421.843s	    output:  255 Mb/s   input:  391 Mb/s
 	======================================================================
-	 8388608	     54427 ns/op	     10473 hit/s/mem
+	 8388608	     50288 ns/op	     11351 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	923.758s
+	ok  	github.com/imchuncai/umem-cache-benchmark	857.427s
