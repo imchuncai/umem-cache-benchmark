@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: BSD-3-Clause
-.. Copyright (C) 2025, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
+.. Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 ====================
 Umem-cache-benchmark
@@ -57,16 +57,16 @@ RPI4B
 =====
 
 两台带风扇的4GB版本的树莓派4 Model B用千兆网络在局域网连接，一台用作服务端，另一台用作客户端。两台机
-器所安装的操作系统都为Fedora-Server-40-1.14.aarch64。
+器所安装的操作系统都为Fedora-Server-7.1.3-200.fc44.aarch64。
 
 测试结果
 -------
 
 Umem-cache在各个方面都有明显的领先：
 
-.. [#] 命中率比Memcached高8%到14%，比Redis高12%到15%。
-.. [#] 在未开启TLS的情况下，命中吞吐量比Memcached高2%到24%，比Redis高7%到59%。
-.. [#] 在开启TLS的情况下，命中吞吐量比Memcached高8%到60%，比Redis高10%到121%。
+.. [#] 命中率比Memcached高9%到14%，比Redis高12%到18%。
+.. [#] 在未开启TLS的情况下，命中吞吐量比Memcached高8%到25%，比Redis高13%到69%。
+.. [#] 在开启TLS的情况下，命中吞吐量比Memcached高12%到54%，比Redis高20%到79%。
 
 测试详细结果在 `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/translations/zh_CN/rpi4b>`_ 。
 

@@ -64,16 +64,16 @@ RPI4B
 
 Two 4GB version of Raspberry Pi 4 Model B with fans connected in LAN with
 Gigabit network. One used as a server and the other as a client. And the
-installed operating system is Fedora-Server-40-1.14.aarch64.
+installed operating system is Fedora-Server-7.1.3-200.fc44.aarch64.
 
 Test Result
 -----------
 
 Umem-cache demonstrates significant advantages across various aspects:
 
-.. [#] Hit rate is 8% to 14% higher than Memcached and 12% to 15% higher than Redis.
-.. [#] Without TLS enabled, hit throughput is 2% to 24% higher than Memcached and 7% to 59% higher than Redis.
-.. [#] With TLS enabled, hit throughput is 8% to 60% higher than Memcached and 10% to 121% higher than Redis.
+.. [#] Hit rate is 9% to 14% higher than Memcached and 12% to 18% higher than Redis.
+.. [#] Without TLS enabled, hit throughput is 8% to 25% higher than Memcached and 13% to 69% higher than Redis.
+.. [#] With TLS enabled, hit throughput is 12% to 54% higher than Memcached and 20% to 79% higher than Redis.
 
 The details is at `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/rpi4b>`_ .
 
