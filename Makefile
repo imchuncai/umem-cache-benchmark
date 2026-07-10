@@ -5,8 +5,12 @@ TEST_N_RATIO = 16
 PARALLELISM = 16
 
 ifndef APP
-APPS = Memcached UmemCache Redis1 Redis2 Redis3 Redis4
+APPS = Memcached UmemCache Redis
 $(error APP is not defined! Available apps: $(APPS))
+endif
+
+ifndef APP_THREAD_NR
+$(error APP_THREAD_NR is not defined!)
 endif
 
 ifndef REMOTE_IPV6
@@ -32,7 +36,7 @@ define test =
 		fi))
 
 	go test -bench=^Benchmark$(APP)$$ -benchtime=$(BENCHTIME)x	\
-	-args $(1) $(2) $(3) $(PARALLELISM) $(TLS) $(REMOTE_IPV6)
+	-args $(1) $(2) $(3) $(PARALLELISM) $(APP_THREAD_NR) $(TLS) $(REMOTE_IPV6)
 	@echo ""
 endef
 

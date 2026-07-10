@@ -17,11 +17,11 @@ type UmemCacheClient struct {
 	client *client.Client
 }
 
-func (c *UmemCacheClient) Init(remoteIPV6 string, config *tls.Config) error {
+func (c *UmemCacheClient) Init(remoteIPV6 string, threadNR int, config *tls.Config) error {
 	var err error
 	c.client, err = client.New(
 		fmt.Sprintf("%s:%d", remoteIPV6, UMEM_CACHE_PORT),
-		client.Config{TIMEOUT, THREAD_NR, 0, config},
+		client.Config{TIMEOUT, threadNR, 0, config},
 	)
 	if err != nil {
 		return fmt.Errorf("new client failed: %w", err)
@@ -37,5 +37,5 @@ func (c *UmemCacheClient) GetOrSet(key []byte, i uint64, fallbackVal func() []by
 }
 
 func BenchmarkUmemCache(b *testing.B) {
-	parallel(b, &UmemCacheClient{})
+	parallel[UmemCacheClient](b)
 }

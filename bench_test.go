@@ -21,13 +21,12 @@ import (
 )
 
 const (
-	THREAD_NR = 3
-	TIMEOUT   = 30 * time.Second
-	SEED      = 47
+	TIMEOUT = 30 * time.Second
+	SEED    = 47
 )
 
 type Client interface {
-	Init(remoteIPV6 string, config *tls.Config) error
+	Init(remoteIPV6 string, threadNR int, config *tls.Config) error
 	GetOrSet(key []byte, i uint64, fallbackVal func() []byte) ([]byte, error)
 }
 
@@ -98,14 +97,17 @@ func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeLimit uint32
 	return
 }
 
-func parallel(b *testing.B, client Client) {
+func parallel[T any, PT interface {
+	*T
+	Client
+}](b *testing.B) {
 	if b.N == 1 {
 		// benchmark is called twice, drop the first
 		return
 	}
 
 	args := flag.Args()
-	if len(args) < 6 {
+	if len(args) < 7 {
 		b.Fatal("bad args length")
 	}
 	randSize := args[0] == "true"
@@ -123,11 +125,15 @@ func parallel(b *testing.B, client Client) {
 		b.Fatalf("bad arg parallelism")
 	}
 	b.SetParallelism(parallelism)
-	tlsEnable, err := strconv.Atoi(args[4])
+	threadNR, err := strconv.Atoi(args[4])
+	if err != nil {
+		b.Fatalf("bad arg threadNR")
+	}
+	tlsEnable, err := strconv.Atoi(args[5])
 	if err != nil {
 		b.Fatalf("bad arg tls")
 	}
-	remoteIP := args[5]
+	remoteIP := args[6]
 
 	var config *tls.Config
 	if tlsEnable == 1 {
@@ -150,7 +156,8 @@ func parallel(b *testing.B, client Client) {
 		}
 	}
 
-	err = client.Init(remoteIP, config)
+	client := PT(new(T))
+	err = client.Init(remoteIP, threadNR, config)
 	if err != nil {
 		b.Fatalf("client init failed: %v", err)
 	}

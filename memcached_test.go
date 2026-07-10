@@ -21,7 +21,7 @@ type MemcachedClient struct {
 	client *memcache.Client
 }
 
-func (c *MemcachedClient) Init(remoteIPV6 string, config *tls.Config) error {
+func (c *MemcachedClient) Init(remoteIPV6 string, threadNR int, config *tls.Config) error {
 	client := memcache.New(fmt.Sprintf("%s:%d", remoteIPV6, MEMCACHED_PORT))
 	client.Timeout = TIMEOUT
 	client.MaxIdleConns = math.MaxInt
@@ -59,5 +59,5 @@ func stringKey(b []byte) string {
 }
 
 func BenchmarkMemcached(b *testing.B) {
-	parallel(b, &MemcachedClient{})
+	parallel[MemcachedClient](b)
 }

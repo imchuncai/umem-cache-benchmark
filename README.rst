@@ -72,8 +72,8 @@ Test Result
 Umem-cache demonstrates significant advantages across various aspects:
 
 .. [#] Hit rate is 9% to 14% higher than Memcached and 12% to 18% higher than Redis.
-.. [#] Without TLS enabled, hit throughput is 8% to 25% higher than Memcached and 13% to 69% higher than Redis.
-.. [#] With TLS enabled, hit throughput is 12% to 54% higher than Memcached and 20% to 79% higher than Redis.
+.. [#] Without TLS enabled, hit throughput is 11% to 24% higher than Memcached and 12% to 62% higher than Redis.
+.. [#] With TLS enabled, hit throughput is 17% to 54% higher than Memcached and 19% to 81% higher than Redis.
 
 The details is at `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/rpi4b>`_ .
 
