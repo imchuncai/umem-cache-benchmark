@@ -29,7 +29,7 @@ func (c *UmemCacheClient) Init(remoteIPV6 string, threadNR int, config *tls.Conf
 	return nil
 }
 
-func (c *UmemCacheClient) GetOrSet(key []byte, i uint64, fallbackVal func() []byte) ([]byte, error) {
+func (c *UmemCacheClient) GetOrSet(key []byte, fallbackVal func() []byte) ([]byte, error) {
 	get := func([]byte) ([]byte, error) {
 		return fallbackVal(), nil
 	}

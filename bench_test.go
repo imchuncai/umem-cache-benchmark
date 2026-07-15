@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
-	"hash/fnv"
 	"math"
 	"math/bits"
 	"math/rand/v2"
@@ -18,79 +17,88 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/twmb/murmur3"
 )
 
 const (
 	TIMEOUT = 30 * time.Second
 	SEED    = 47
+	HEX     = "0123456789abcdef"
 )
 
 type Client interface {
 	Init(remoteIPV6 string, threadNR int, config *tls.Config) error
-	GetOrSet(key []byte, i uint64, fallbackVal func() []byte) ([]byte, error)
+	GetOrSet(key []byte, fallbackVal func() []byte) ([]byte, error)
 }
 
-func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeLimit uint32, randSize bool) (
+type TestCase struct {
+	HexIndex [16]byte
+	KeySize  uint32
+	KvSize   uint32
+}
+
+func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeMax uint32, randSize bool) (
 	throughput uint64, output uint64, miss uint64) {
 	// key size is rand from 16~47 bytes
-	if kvSizeLimit < 47 {
-		panic("bad kvSizeLimit")
+	if kvSizeMax < 47 {
+		panic("bad kvSizeMax")
+	}
+
+	cases := make([]TestCase, b.N)
+	for i := 0; i < b.N; i++ {
+		index := zipf.Uint64()
+		var hex [16]byte
+		for i := 0; i < 16; i++ {
+			hex[i] = HEX[(index>>(i<<2))&0xf]
+		}
+		h1, h2 := murmur3.SeedSum128(SEED, SEED, hex[:])
+
+		keySize := uint32(h1)&31 + 16
+		if randSize {
+			hi, _ := bits.Mul32(uint32(h2), kvSizeMax-keySize+1)
+			cases[i] = TestCase{hex, keySize, hi + keySize}
+		} else {
+			cases[i] = TestCase{hex, keySize, kvSizeMax}
+		}
+		throughput += uint64(cases[i].KvSize)
 	}
 
 	// make the benchmark result as stable as possible
 	var atomicI atomic.Uint64
 	atomicI.Store(math.MaxUint64)
-	indexes := make([]uint64, b.N)
-	for i := 0; i < b.N; i++ {
-		indexes[i] = zipf.Uint64()
+
+	keyTemplate := make([]byte, 47)
+	for i := 0; i < len(keyTemplate); i += len(HEX) {
+		copy(keyTemplate[i:], HEX)
 	}
 
-	const hex = "0123456789abcdef"
-	kvTemplate := make([]byte, kvSizeLimit)
-	for i := 0; i < len(kvTemplate); i += len(hex) {
-		copy(kvTemplate[i:], hex)
-	}
-
-	KvSize := func(h uint64, keyLen uint32) uint32 {
-		return kvSizeLimit
-	}
-	if randSize {
-		KvSize = func(h uint64, keyLen uint32) uint32 {
-			hi, _ := bits.Mul32(uint32(h>>32), kvSizeLimit-keyLen)
-			return hi + keyLen
-		}
+	valTemplate := make([]byte, kvSizeMax-16)
+	for i := 0; i < len(valTemplate); i += len(HEX) {
+		copy(valTemplate[i:], HEX)
 	}
 
 	b.StartTimer()
 	b.ResetTimer()
 	defer b.StopTimer()
 	b.RunParallel(func(p *testing.PB) {
-		s := bytes.Clone(kvTemplate)
-		r := fnv.New64a()
-		var __throughput, __output, __miss uint64
+		keyTemp := bytes.Clone(keyTemplate)
+		var __output, __miss uint64
 		for p.Next() {
-			index := indexes[atomicI.Add(1)]
-			for i := 0; i < 16; i++ {
-				s[i] = hex[(index>>(i<<2))&0xf]
-			}
-			r.Reset()
-			r.Write(s[:16])
-			h := r.Sum64()
+			tc := cases[atomicI.Add(1)]
+			copy(keyTemp, tc.HexIndex[:])
 
-			keyLen := uint32(h)&31 + 16
 			fallbackVal := func() []byte {
 				__miss++
-				kvSize := KvSize(h, keyLen)
-				__output += uint64(kvSize)
-				return s[keyLen:kvSize]
+				__output += uint64(tc.KvSize)
+				return valTemplate[:tc.KvSize-tc.KeySize]
 			}
-			val, err := client.GetOrSet(s[:keyLen], index, fallbackVal)
+
+			_, err := client.GetOrSet(keyTemp[:tc.KeySize], fallbackVal)
 			if err != nil {
 				b.Fatalf("got error: %v", err)
 			}
-			__throughput += uint64(keyLen) + uint64(len(val))
 		}
-		atomic.AddUint64(&throughput, __throughput)
 		atomic.AddUint64(&output, __output)
 		atomic.AddUint64(&miss, __miss)
 	})
@@ -115,11 +123,11 @@ func parallel[T any, PT interface {
 	if err != nil {
 		b.Fatalf("bad arg serverMemory: %s", args[1])
 	}
-	__kvSizeLimit, err := strconv.ParseUint(args[2], 10, 64)
-	if err != nil || __kvSizeLimit > math.MaxUint32 {
-		b.Fatalf("bad arg kvSizeLimit")
+	__kvSizeMax, err := strconv.ParseUint(args[2], 10, 64)
+	if err != nil || __kvSizeMax > math.MaxUint32 {
+		b.Fatalf("bad arg kvSizeMax")
 	}
-	kvSizeLimit := uint32(__kvSizeLimit)
+	kvSizeMax := uint32(__kvSizeMax)
 	parallelism, err := strconv.Atoi(args[3])
 	if err != nil {
 		b.Fatalf("bad arg parallelism")
@@ -162,7 +170,7 @@ func parallel[T any, PT interface {
 		b.Fatalf("client init failed: %v", err)
 	}
 
-	cap := serverMemory / uint64(kvSizeLimit)
+	cap := serverMemory / uint64(kvSizeMax)
 	if randSize {
 		cap *= 2
 	}
@@ -170,9 +178,9 @@ func parallel[T any, PT interface {
 	zipf := rand.NewZipf(r, 1.0001, 1.0, cap*1000)
 
 	// warmup
-	__parallel(b, client, zipf, kvSizeLimit, randSize)
+	__parallel(b, client, zipf, kvSizeMax, randSize)
 
-	throughput, output, miss := __parallel(b, client, zipf, kvSizeLimit, randSize)
+	throughput, output, miss := __parallel(b, client, zipf, kvSizeMax, randSize)
 	hit := b.N - int(miss)
 	hitRate := float64(hit) / float64(b.N) * 100
 	fmt.Printf("\n======================================================================\n"+

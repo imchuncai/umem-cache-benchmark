@@ -7,9 +7,11 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"math/bits"
 	"testing"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/twmb/murmur3"
 )
 
 const REDIS_PORT = 6379
@@ -32,8 +34,10 @@ func (c *RedisClient) Init(remoteIPV6 string, threadNR int, config *tls.Config) 
 	return nil
 }
 
-func (c *RedisClient) GetOrSet(key []byte, i uint64, fallbackVal func() []byte) ([]byte, error) {
-	client := c.clients[int(i)%len(c.clients)]
+func (c *RedisClient) GetOrSet(key []byte, fallbackVal func() []byte) ([]byte, error) {
+	h, _ := murmur3.SeedSum128(REDIS_PORT, REDIS_PORT, key)
+	hi, _ := bits.Mul32(uint32(h), uint32(len(c.clients)))
+	client := c.clients[hi]
 	strKey := stringKey(key)
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()

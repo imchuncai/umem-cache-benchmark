@@ -64,9 +64,9 @@ RPI4B
 
 Umem-cache在各个方面都有明显的领先：
 
-.. [#] 命中率比Memcached高9%到14%，比Redis高12%到18%。
-.. [#] 在未开启TLS的情况下，命中吞吐量比Memcached高11%到24%，比Redis高12%到62%。
-.. [#] 在开启TLS的情况下，命中吞吐量比Memcached高17%到54%，比Redis高19%到81%。
+.. [#] 命中率比Memcached高9%到14%，比Redis高12%到19%。
+.. [#] 在未开启TLS的情况下，命中吞吐量比Memcached高14%到23%，比Redis高15%到66%。
+.. [#] 在开启TLS的情况下，命中吞吐量比Memcached高16%到53%，比Redis高18%到81%。
 
 测试详细结果在 `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/translations/zh_CN/rpi4b>`_ 。
 

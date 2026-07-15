@@ -9,8 +9,8 @@
 ====
 ::
 
-	Umem-cache的命中率比Memcached高14%，比Redis高18%。
-	Umem-cache的命中吞吐量比Memcached高17%，比Redis高19%。
+	Umem-cache的命中率比Memcached高14%，比Redis高16%。
+	Umem-cache的命中吞吐量比Memcached高16%，比Redis高18%。
 
 	注意：网络吞吐量已经接近千兆网络的极限。
 
@@ -48,13 +48,13 @@ Memcached
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkMemcached-3   	
 	======================================================================
-	server:     4096    warmup:    65536    get:    65536    hit:    30602
-	VmHWM: 2129664 kB   hit_rate: 46.69%    per_memory_hit_rate: 45.98%
-	197.174s	    output:  708 Mb/s   input:  683 Mb/s
+	server:     4096    warmup:    65536    get:    65536    hit:    30658
+	VmHWM: 2131104 kB   hit_rate: 46.78%    per_memory_hit_rate: 46.04%
+	187.394s	    output:  749 Mb/s   input:  689 Mb/s
 	======================================================================
-	   65536	   3008630 ns/op	       153 hit/s/mem
+	   65536	   2859403 ns/op	       161 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	388.573s
+	ok  	github.com/imchuncai/umem-cache-benchmark	375.183s
 
 Umem-cache
 ==========
@@ -85,13 +85,13 @@ Umem-cache
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkUmemCache-3   	
 	======================================================================
-	server:     4096    warmup:    65536    get:    65536    hit:    34571
-	VmHWM: 2103544 kB   hit_rate: 52.75%    per_memory_hit_rate: 52.59%
-	192.765s	    output:  641 Mb/s   input:  782 Mb/s
+	server:     4096    warmup:    65536    get:    65536    hit:    34613
+	VmHWM: 2105756 kB   hit_rate: 52.82%    per_memory_hit_rate: 52.60%
+	185.440s	    output:  670 Mb/s   input:  784 Mb/s
 	======================================================================
-	   65536	   2941368 ns/op	       179 hit/s/mem
+	   65536	   2829589 ns/op	       186 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	385.953s
+	ok  	github.com/imchuncai/umem-cache-benchmark	368.774s
 
 Redis
 =====
@@ -135,12 +135,12 @@ Redis
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkRedis-3   	
 	======================================================================
-	server:     4096    warmup:    65536    get:    65536    hit:    31394
-	VmHWM:  757092 kB   hit_rate: 47.90%    per_memory_hit_rate: 44.74%
-	VmHWM:  744020 kB
-	VmHWM:  744440 kB
-	193.750s	    output:  703 Mb/s   input:  713 Mb/s
+	server:     4096    warmup:    65536    get:    65536    hit:    31430
+	VmHWM:  740640 kB   hit_rate: 47.96%    per_memory_hit_rate: 45.22%
+	VmHWM:  740964 kB
+	VmHWM:  742596 kB
+	188.725s	    output:  725 Mb/s   input:  703 Mb/s
 	======================================================================
-	   65536	   2956388 ns/op	       151 hit/s/mem
+	   65536	   2879713 ns/op	       157 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	391.281s
+	ok  	github.com/imchuncai/umem-cache-benchmark	376.703s

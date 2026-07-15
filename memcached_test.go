@@ -36,7 +36,7 @@ func (c *MemcachedClient) Init(remoteIPV6 string, threadNR int, config *tls.Conf
 	return nil
 }
 
-func (c *MemcachedClient) GetOrSet(key []byte, i uint64, fallbackVal func() []byte) ([]byte, error) {
+func (c *MemcachedClient) GetOrSet(key []byte, fallbackVal func() []byte) ([]byte, error) {
 	strKey := stringKey(key)
 	item, err := c.client.Get(strKey)
 	if err == nil {
