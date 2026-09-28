@@ -9,8 +9,8 @@ Conclusion
 ==========
 ::
 
-	Umem-cache's hit rate is 10% higher than Memcached and 17% higher than Redis.
-	Umem-cache's hit throughput is 14% higher than Memcached and 66% higher than Redis.
+	Umem-cache's hit rate is 10% higher than Memcached and 15% higher than Redis.
+	Umem-cache's hit throughput is 55% higher than Memcached and 79% higher than Redis.
 
 Memcached
 =========
@@ -30,27 +30,27 @@ Run Command
 -----------
 ::
 
-	taskset -c 1,2,3 ./memcached --memory-limit=1024 \
-	--max-item-size=1048576 -t 3
+	taskset -c 1 ./memcached --memory-limit=1024 \
+	--max-item-size=1048576 -t 1
 
 Test Result
 -----------
 ::
 
 	taskset -c 1,2,3 go test -bench=^BenchmarkMemcached$ -benchtime=33554432x \
-	-args false 1073741824 512 16 3 0 [fe80::179:7fda:ca6e:7c1e%end0]
+	-args false 1073741824 512 16 1 0 [fe80::179:7fda:ca6e:7c1e%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkMemcached-3   	
 	======================================================================
-	server:  2097152    warmup: 33554432    get: 33554432    hit: 20639492
-	VmHWM: 1077272 kB   hit_rate: 61.51%    per_memory_hit_rate: 59.87%
-	896.250s	    output:   56 Mb/s   input:   90 Mb/s
+	server:  2097152    warmup: 33554432    get: 33554432    hit: 20639821
+	VmHWM: 1076716 kB   hit_rate: 61.51%    per_memory_hit_rate: 59.90%
+	1518.779s	    output:   33 Mb/s   input:   53 Mb/s
 	======================================================================
-	33554432	     26710 ns/op	     22415 hit/s/mem
+	33554432	     45263 ns/op	     13235 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	1846.338s
+	ok  	github.com/imchuncai/umem-cache-benchmark	3091.796s
 
 Umem-cache
 ==========
@@ -62,32 +62,32 @@ Build Command
 -------------
 ::
 
-	make MEM_LIMIT=1073741824 THREAD_NR=3 MAX_CONN=144
+	make MEM_LIMIT=1073741824 THREAD_NR=1 MAX_CONN=48
 
 Run Command
 -----------
 ::
 
-	taskset -c 1,2,3 ./umem-cache 10047
+	taskset -c 1 ./umem-cache 10047
 
 Test Result
 -----------
 ::
 
 	taskset -c 1,2,3 go test -bench=^BenchmarkUmemCache$ -benchtime=33554432x \
-	-args false 1073741824 512 16 3 0 [fe80::179:7fda:ca6e:7c1e%end0]
+	-args false 1073741824 512 16 1 0 [fe80::179:7fda:ca6e:7c1e%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkUmemCache-3   	
 	======================================================================
-	server:  2097152    warmup: 33554432    get: 33554432    hit: 22050418
-	VmHWM: 1049772 kB   hit_rate: 65.72%    per_memory_hit_rate: 65.64%
-	862.875s	    output:   52 Mb/s   input:  100 Mb/s
+	server:  2097152    warmup: 33554432    get: 33554432    hit: 22049190
+	VmHWM: 1049720 kB   hit_rate: 65.71%    per_memory_hit_rate: 65.64%
+	1076.781s	    output:   42 Mb/s   input:   80 Mb/s
 	======================================================================
-	33554432	     25716 ns/op	     25525 hit/s/mem
+	33554432	     32091 ns/op	     20455 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	1789.525s
+	ok  	github.com/imchuncai/umem-cache-benchmark	2203.993s
 
 Redis
 =====
@@ -105,35 +105,25 @@ Run Command
 -----------
 ::
 
-	taskset -c 1,2,3 ./src/redis-server --protected-mode no --appendonly no --save "" \
-	--maxmemory 357913941 --maxclients 48 --maxmemory-policy allkeys-lfu \
+	taskset -c 1 ./src/redis-server --protected-mode no --appendonly no --save "" \
+	--maxmemory 1073741824 --maxclients 48 --maxmemory-policy allkeys-lfu \
 	--port 6379
-
-	taskset -c 1,2,3 ./src/redis-server --protected-mode no --appendonly no --save "" \
-	--maxmemory 357913941 --maxclients 48 --maxmemory-policy allkeys-lfu \
-	--port 6380
-
-	taskset -c 1,2,3 ./src/redis-server --protected-mode no --appendonly no --save "" \
-	--maxmemory 357913941 --maxclients 48 --maxmemory-policy allkeys-lfu \
-	--port 6381
 
 Test Result
 -----------
 ::
 
 	taskset -c 1,2,3 go test -bench=^BenchmarkRedis$ -benchtime=33554432x \
-	-args false 1073741824 512 16 3 0 [fe80::179:7fda:ca6e:7c1e%end0]
+	-args false 1073741824 512 16 1 0 [fe80::179:7fda:ca6e:7c1e%end0]
 	goos: linux
 	goarch: arm64
 	pkg: github.com/imchuncai/umem-cache-benchmark
 	BenchmarkRedis-3   	
 	======================================================================
-	server:  2097152    warmup: 33554432    get: 33554432    hit: 20188512
-	VmHWM:  374764 kB   hit_rate: 60.17%    per_memory_hit_rate: 56.11%
-	VmHWM:  374816 kB
-	VmHWM:  374780 kB
-	1226.713s	    output:   43 Mb/s   input:   64 Mb/s
+	server:  2097152    warmup: 33554432    get: 33554432    hit: 20084717
+	VmHWM: 1100480 kB   hit_rate: 59.86%    per_memory_hit_rate: 57.03%
+	1672.125s	    output:   31 Mb/s   input:   47 Mb/s
 	======================================================================
-	33554432	     36559 ns/op	     15348 hit/s/mem
+	33554432	     49833 ns/op	     11445 hit/s/mem
 	PASS
-	ok  	github.com/imchuncai/umem-cache-benchmark	2496.899s
+	ok  	github.com/imchuncai/umem-cache-benchmark	3370.834s

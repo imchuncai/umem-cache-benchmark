@@ -69,11 +69,8 @@ installed operating system is Fedora-Server-7.1.3-200.fc44.aarch64.
 Test Result
 -----------
 
-Umem-cache demonstrates significant advantages across various aspects:
-
-.. [#] Hit rate is 9% to 14% higher than Memcached and 12% to 19% higher than Redis.
-.. [#] Without TLS enabled, hit throughput is 14% to 23% higher than Memcached and 15% to 66% higher than Redis.
-.. [#] With TLS enabled, hit throughput is 16% to 53% higher than Memcached and 18% to 81% higher than Redis.
+In benchmark tests with Zipf-based distribution and KV size within 1KB,
+Umem-cache achieved a 10% higher hit rate and 50% higher hit throughput than Memcached and Redis.
 
 The details is at `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/rpi4b>`_ .
 
