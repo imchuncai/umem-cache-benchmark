@@ -62,8 +62,8 @@ RPI4B
 测试结果
 -------
 
-在基于Zipf分布且键值对大小在1KB以内的基准测试中，Umem-cache的命中率比Memcached和Redis高
-出10%，命中吞吐量高出50%。
+在基于Zipf分布且键值对大小在1KB以内的基准测试中，与Memcached和Redis相比，
+Umem-cache的命中率高出10%，命中吞吐量高出55%，同时将P90延迟降低了50%以上，P99.9延迟降低了40%以上。
 
 测试详细结果在 `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/translations/zh_CN/rpi4b>`_ 。
 

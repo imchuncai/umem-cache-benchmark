@@ -2,20 +2,16 @@
 # Copyright (C) 2025-2026, Shu De Zheng <imchuncai@gmail.com>. All Rights Reserved.
 
 TEST_N_RATIO = 16
-PARALLELISM = 16
 
-ifndef APP
+APP := UmemCache
 APPS = Memcached UmemCache Redis
-$(error APP is not defined! Available apps: $(APPS))
+ifeq ($(filter $(APP), $(APPS)),)
+$(error Available apps: $(APPS))
 endif
 
-ifndef APP_THREAD_NR
-$(error APP_THREAD_NR is not defined!)
-endif
-
-ifndef REMOTE_IPV6
-$(error REMOTE_IPV6 is not defined! Example: [::1])
-endif
+APP_THREAD_NR ?= 4
+PARALLELISM   ?= 16
+REMOTE_IPV6   ?= [::1]
 
 ifdef TLS
 	ifneq ($(TLS),0)

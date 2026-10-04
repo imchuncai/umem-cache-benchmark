@@ -14,6 +14,7 @@ import (
 	"math/rand/v2"
 	"os"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -22,9 +23,10 @@ import (
 )
 
 const (
-	TIMEOUT = 30 * time.Second
-	SEED    = 47
-	HEX     = "0123456789abcdef"
+	TIMEOUT      = 30 * time.Second
+	SEED         = 47
+	LATENCY_SIZE = 10000
+	HEX          = "0123456789abcdef"
 )
 
 type Client interface {
@@ -39,7 +41,7 @@ type TestCase struct {
 }
 
 func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeMax uint32, randSize bool) (
-	throughput uint64, output uint64, miss uint64) {
+	throughput uint64, output uint64, miss uint64, latencyUS [LATENCY_SIZE]int) {
 	// key size is rand from 16~47 bytes
 	if kvSizeMax < 47 {
 		panic("bad kvSizeMax")
@@ -78,12 +80,15 @@ func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeMax uint32, 
 		copy(valTemplate[i:], HEX)
 	}
 
+	var mu sync.Mutex
 	b.StartTimer()
 	b.ResetTimer()
 	defer b.StopTimer()
 	b.RunParallel(func(p *testing.PB) {
 		keyTemp := bytes.Clone(keyTemplate)
 		var __output, __miss uint64
+		var __latencyUS [LATENCY_SIZE]int
+		prev := time.Now()
 		for p.Next() {
 			tc := cases[atomicI.Add(1)]
 			copy(keyTemp, tc.HexIndex[:])
@@ -98,11 +103,39 @@ func __parallel(b *testing.B, client Client, zipf *rand.Zipf, kvSizeMax uint32, 
 			if err != nil {
 				b.Fatalf("got error: %v", err)
 			}
+
+			now := time.Now()
+			delta := now.Sub(prev).Microseconds()
+			prev = now
+			if delta >= LATENCY_SIZE {
+				__latencyUS[LATENCY_SIZE-1]++
+			} else {
+				__latencyUS[delta]++
+			}
 		}
-		atomic.AddUint64(&output, __output)
-		atomic.AddUint64(&miss, __miss)
+
+		mu.Lock()
+		defer mu.Unlock()
+
+		output += __output
+		miss += __miss
+		for i := range LATENCY_SIZE {
+			latencyUS[i] += __latencyUS[i]
+		}
 	})
 	return
+}
+
+func PercentileLatency(latencyUS [LATENCY_SIZE]int, n, pct3 int) int {
+	t := n * pct3 / 1000
+	sum := 0
+	for i := range latencyUS {
+		sum += latencyUS[i]
+		if sum >= t {
+			return i
+		}
+	}
+	return LATENCY_SIZE - 1
 }
 
 func parallel[T any, PT interface {
@@ -180,15 +213,23 @@ func parallel[T any, PT interface {
 	// warmup
 	__parallel(b, client, zipf, kvSizeMax, randSize)
 
-	throughput, output, miss := __parallel(b, client, zipf, kvSizeMax, randSize)
+	throughput, output, miss, latencyUS := __parallel(b, client, zipf, kvSizeMax, randSize)
+	p1 := PercentileLatency(latencyUS, b.N, 1)
+	p50 := PercentileLatency(latencyUS, b.N, 500)
+	p90 := PercentileLatency(latencyUS, b.N, 900)
+	p99 := PercentileLatency(latencyUS, b.N, 990)
+	p999 := PercentileLatency(latencyUS, b.N, 999)
 	hit := b.N - int(miss)
 	hitRate := float64(hit) / float64(b.N) * 100
 	fmt.Printf("\n======================================================================\n"+
 		"server: %8d    warmup: %8d    get: %8d    hit: %8d\n"+
 		"VmHWM: %7d kB   hit_rate: %.2f%%    per_memory_hit_rate: %.2f%%\n"+
+		"P1: %3d us  P50: %3d us  P90: %3d us  P99: %3d us  P99.9: %3d us\n"+
 		"%.3fs\t    output: %4.0f Mb/s   input: %4.0f Mb/s\n"+
 		"======================================================================\n",
-		cap, b.N, b.N, hit, 0, hitRate, hitRate, b.Elapsed().Seconds(),
+		cap, b.N, b.N, hit, 0, hitRate, hitRate,
+		p1, p50, p90, p99, p999,
+		b.Elapsed().Seconds(),
 		float64(output*8)/1024/1024/b.Elapsed().Seconds(),
 		float64((throughput-output)*8)/1024/1024/b.Elapsed().Seconds(),
 	)

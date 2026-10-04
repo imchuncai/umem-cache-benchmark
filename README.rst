@@ -70,7 +70,9 @@ Test Result
 -----------
 
 In benchmark tests with Zipf-based distribution and KV size within 1KB,
-Umem-cache achieved a 10% higher hit rate and 50% higher hit throughput than Memcached and Redis.
+Umem-cache achieved a 10% higher hit rate and 55% higher hit throughput,
+while reducing P90 latency by over 50% and P99.9 latency by over 40%
+compared to Memcached and Redis.
 
 The details is at `rpi4b <https://github.com/imchuncai/umem-cache-benchmark/tree/master/Documentation/rpi4b>`_ .
 
