@@ -60,7 +60,7 @@ Umem-cache
 ==========
 ::
 
-	commit 32cedee7c65bf3af587956f8a80e66efce4643b3
+	commit 3a5ffc8fa406ca142ad99c5d49f312dcc8dd59da
 
 编译命令
 -------
