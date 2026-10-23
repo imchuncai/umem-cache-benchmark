@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20260422231931-4d751bb6e37c
-	github.com/imchuncai/umem-cache-client-Go v0.0.0-20261012063143-473a8fc59947
+	github.com/imchuncai/umem-cache-client-Go v0.0.0-20261022070905-0c43de2d5ed1
 	github.com/redis/go-redis/v9 v9.20.1
 	github.com/twmb/murmur3 v1.1.8
 )
