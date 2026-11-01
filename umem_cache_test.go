@@ -21,7 +21,7 @@ func (c *UmemCacheClient) Init(remoteIPV6 string, threadNR int, config *tls.Conf
 	var err error
 	c.client, err = client.New(
 		fmt.Sprintf("%s:%d", remoteIPV6, UMEM_CACHE_PORT),
-		client.Config{TIMEOUT, threadNR, 0, config},
+		client.Config{TIMEOUT, 0, config},
 	)
 	if err != nil {
 		return fmt.Errorf("new client failed: %w", err)
