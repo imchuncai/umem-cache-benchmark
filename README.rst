@@ -48,10 +48,7 @@ Supported Apps
 
 - Memcached
 - UmemCache
-- Redis1
-- Redis2
-- Redis3
-- Redis4
+- Redis
 
 Note: because Redis is designed to be single-threaded, it may not be able to
 fully utilize the performance of the test machine, so we support it running

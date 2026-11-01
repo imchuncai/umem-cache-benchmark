@@ -43,10 +43,7 @@ Multilingual 多语言
 
 - Memcached
 - UmemCache
-- Redis1
-- Redis2
-- Redis3
-- Redis4
+- Redis
 
 注意： 因为Redis被设计为单线程，可能无法充分利用测试机的性能，所以我们支持了它跑多个实例，
 然后把所有的键值对均匀地分散到这些实例上。
