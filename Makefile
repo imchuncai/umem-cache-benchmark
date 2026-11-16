@@ -4,7 +4,7 @@
 TEST_N_RATIO = 16
 
 APP := UmemCache
-APPS = Memcached UmemCache Redis
+APPS = Memcached UmemCache Redis UmemCacheCluster RedisCluster
 ifeq ($(filter $(APP), $(APPS)),)
 $(error Available apps: $(APPS))
 endif
@@ -53,3 +53,22 @@ test-1g-512b:
 
 test-2g-513k:
 	$(call test,false,$(call math, 2 << 30),$(call math, 513 << 10))
+
+
+test-random-400m-1k:
+	$(call test,true,$(call math, 400 << 20),$(call math, 1 << 10))
+
+test-random-4g-1k:
+	$(call test,true,$(call math, 4 << 30),$(call math, 1 << 10))
+
+test-random-8g-8k:
+	$(call test,true,$(call math, 8 << 30),$(call math, 8 << 10))
+
+test-random-8g-1m:
+	$(call test,true,$(call math, 8 << 30),$(call math, 1 << 20))
+
+test-8g-512b:
+	$(call test,false,$(call math, 8 << 30),512)
+
+test-8g-513k:
+	$(call test,false,$(call math, 8 << 30),$(call math, 513 << 10))
